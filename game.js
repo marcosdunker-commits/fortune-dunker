@@ -1,7 +1,7 @@
 // ============================================================
 //  Fortune DUNKER — caça-níquel 5×5, estilo "tigrinho".
 //  Símbolos desenhados em vetor (nítidos em qualquer resolução).
-//  Créditos fictícios, só diversão.
+//  Valores ficticios, sem dinheiro real, so diversao.
 // ============================================================
 
 const canvas = document.getElementById("tela");
@@ -429,6 +429,9 @@ function salvar() {
 const apostaLinha = () => APOSTAS[apostaIdx];
 const apostaTotal = () => apostaLinha() * numLinhas;
 
+// formata valor fictício em "R$ 1.234"
+const fmt = (n) => "R$ " + Math.round(n).toLocaleString("pt-BR");
+
 // valores mostrados (contam suavemente até o valor real)
 let creditosVis = creditos;
 let premioAlvo = 0;
@@ -439,27 +442,27 @@ function contarValores() {
     const dif = creditos - creditosVis;
     const passo = Math.max(1, Math.ceil(Math.abs(dif) * 0.09));
     creditosVis += Math.sign(dif) * Math.min(Math.abs(dif), passo);
-    el.creditos.textContent = creditosVis;
+    el.creditos.textContent = fmt(creditosVis);
   }
   if (premioVis !== premioAlvo) {
     const dif = premioAlvo - premioVis;
     const passo = Math.max(1, Math.ceil(Math.abs(dif) * 0.09));
     premioVis += Math.sign(dif) * Math.min(Math.abs(dif), passo);
-    el.premio.textContent = premioVis;
+    el.premio.textContent = fmt(premioVis);
   }
 }
 
 function atualizarPainel() {
-  // se os créditos caíram (aposta) ou é a carga inicial, mostra na hora;
-  // se subiram (prêmio), deixa a contagem no loop fazer o efeito
+  // se o valor caiu (aposta) ou é a carga inicial, mostra na hora;
+  // se subiu (prêmio), deixa a contagem no loop fazer o efeito
   if (creditos <= creditosVis) {
     creditosVis = creditos;
-    el.creditos.textContent = creditos;
+    el.creditos.textContent = fmt(creditos);
   }
-  el.premio.textContent = premioVis;
+  el.premio.textContent = fmt(premioVis);
   el.apostaLinha.textContent = apostaLinha();
   el.numLinhas.textContent = numLinhas;
-  el.apostaTotal.textContent = apostaTotal();
+  el.apostaTotal.textContent = fmt(apostaTotal());
   el.girar.disabled = girandoTudo || creditos < apostaTotal();
   el.letras.forEach((sp, i) => sp.classList.toggle("on", coletadas[i]));
   el.deck.forEach((b) => b.classList.toggle("sel", b.dataset.ap === String(apostaIdx)));
@@ -498,7 +501,7 @@ function girar() {
   salvar();
   premioAlvo = 0;
   premioVis = 0;
-  el.premio.textContent = "0";
+  el.premio.textContent = fmt(0);
   el.msg.textContent = "Girando...";
   el.msg.className = "";
   girandoTudo = true;
@@ -603,7 +606,7 @@ function avaliar() {
   premioAlvo = ganho;   // a contagem no loop faz o número entrar
 
   if (creditos < APOSTAS[0]) {
-    el.msg.textContent += "  Sem créditos — clique em Reiniciar.";
+    el.msg.textContent += "  Sem saldo — toque em Reiniciar.";
   }
 
   girandoTudo = false;
@@ -830,7 +833,7 @@ document.getElementById("resetar").addEventListener("click", () => {
   premioVis = 0;
   coletadas = [false, false, false, false, false, false];
   salvar();
-  el.premio.textContent = "0";
+  el.premio.textContent = fmt(0);
   el.msg.textContent = "Reiniciado. Boa sorte!";
   el.msg.className = "";
   atualizarPainel();

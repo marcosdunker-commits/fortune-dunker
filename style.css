@@ -442,12 +442,23 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 
 /* ---- rodapé ---- */
 #rodape {
-  margin-top: 3px;
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  text-transform: uppercase;
+  text-align: center;
+}
+#rodape .aviso {
+  font-size: 8px;
+  letter-spacing: 0.5px;
+  color: rgba(255, 244, 214, 0.42);
+}
+#rodape span:not(.aviso) {
   font-size: 7.5px;
   letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: rgba(255, 244, 214, 0.28);
-  text-align: center;
+  color: rgba(255, 244, 214, 0.26);
 }
 #rodape b {
   font-weight: 700;
