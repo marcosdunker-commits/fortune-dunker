@@ -139,9 +139,9 @@ button { font-family: inherit; cursor: pointer; }
   animation: correTicker 16s linear infinite;
 }
 #ticker span {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 800;
-  letter-spacing: 3px;
+  letter-spacing: 4px;
   color: #fff4d6;
   text-shadow:
     0 0 5px #fff,
@@ -193,9 +193,9 @@ button { font-family: inherit; cursor: pointer; }
 
 h1 {
   margin: -2px 0 0;
-  font-size: 23px;
+  font-size: 19px;
   font-weight: 800;
-  letter-spacing: 3px;
+  letter-spacing: 2.5px;
 }
 h1 .g {
   background: linear-gradient(180deg, var(--ouro-claro), var(--ouro) 50%, var(--ouro-esc));
@@ -268,7 +268,7 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 }
 .letras {
   display: flex;
-  gap: clamp(5px, 1.8vw, 9px);
+  gap: clamp(9px, 3.4vw, 16px);
   justify-content: center;
   margin-top: 9px;
 }
