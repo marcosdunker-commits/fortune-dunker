@@ -139,9 +139,9 @@ button { font-family: inherit; cursor: pointer; }
   animation: correTicker 16s linear infinite;
 }
 #ticker span {
-  font-size: 17px;
+  font-size: 21px;
   font-weight: 800;
-  letter-spacing: 4px;
+  letter-spacing: 5px;
   color: #fff4d6;
   text-shadow:
     0 0 5px #fff,
