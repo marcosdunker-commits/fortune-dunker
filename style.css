@@ -247,8 +247,8 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   animation: correSuper 11s linear infinite;
 }
 .superTrack span {
-  font-size: 11px;
-  letter-spacing: 3px;
+  font-size: 15px;
+  letter-spacing: 4px;
   text-transform: uppercase;
   color: #fff4d6;
   text-shadow:
@@ -273,7 +273,7 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   margin-top: 9px;
 }
 .letras span {
-  --sz: clamp(34px, 10vw, 46px);
+  --sz: clamp(26px, 7.5vw, 36px);
   position: relative;
   width: var(--sz);
   height: var(--sz);
