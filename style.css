@@ -268,9 +268,9 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 }
 .letras {
   display: flex;
-  gap: clamp(9px, 3.4vw, 16px);
+  gap: clamp(13px, 5.5vw, 24px);
   justify-content: center;
-  margin-top: 9px;
+  margin-top: 10px;
 }
 .letras span {
   --sz: clamp(26px, 7.5vw, 36px);
@@ -303,13 +303,18 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   color: #5c3f0c;
   text-shadow: 0 1px 0 rgba(255, 246, 220, 0.7);
   background: radial-gradient(circle at 50% 28%, #fff7e0, var(--ouro) 44%, #a9791a 100%);
-  transform: translateY(-3px) scale(1.05);
-  animation: pulsaChip 1.5s ease-in-out infinite;
+  animation: pulsaChip 1.25s ease-in-out infinite;
 }
 .letras span.on::before { opacity: .3; background: repeating-conic-gradient(rgba(120,82,12,.55) 0 5deg, transparent 5deg 30deg); }
 @keyframes pulsaChip {
-  0%, 100% { box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #ffe9a8, 0 0 0 5px #8a6412, inset 0 2px 4px rgba(255,255,255,.55), 0 0 14px rgba(245,197,66,.6); }
-  50%      { box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #fff6da, 0 0 0 5px #8a6412, inset 0 2px 4px rgba(255,255,255,.6), 0 0 30px rgba(245,197,66,1); }
+  0%, 100% {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #ffe9a8, 0 0 0 5px #8a6412, inset 0 2px 4px rgba(255,255,255,.55), 0 0 12px rgba(245,197,66,.55);
+  }
+  50% {
+    transform: translateY(-6px) scale(1.14);
+    box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #fff6da, 0 0 0 6px #f3cf6a, inset 0 2px 4px rgba(255,255,255,.65), 0 0 34px rgba(245,197,66,1), 0 0 60px rgba(245,197,66,.55);
+  }
 }
 
 /* ===================== PAINEL ===================== */
