@@ -233,36 +233,38 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   box-shadow: inset 0 0 0 1px rgba(245, 197, 66, 0.12), 0 0 20px rgba(245, 197, 66, 0.14);
   text-align: center;
 }
-.superTit {
-  display: inline-block;
+/* letreiro rolando "SUPER PRÊMIO · 50 000" */
+#superTicker {
+  overflow: hidden;
+  margin-bottom: 3px;
+  -webkit-mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+          mask: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+.superTrack {
+  display: flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation: correSuper 11s linear infinite;
+}
+.superTrack span {
   font-size: 11px;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--ouro-claro);
-  transform-origin: center;
-  animation: pulsaSuperTit 1.7s ease-in-out infinite;
+  color: #fff4d6;
+  text-shadow:
+    0 0 5px #fff,
+    0 0 10px #ffd85e,
+    0 0 20px rgba(245, 197, 66, 0.9),
+    0 0 32px rgba(245, 197, 66, 0.5);
 }
-@keyframes pulsaSuperTit {
-  0%, 100% {
-    filter: drop-shadow(0 0 3px rgba(245, 197, 66, 0.3));
-    transform: scale(1);
-    opacity: 0.9;
-  }
-  50% {
-    filter:
-      drop-shadow(0 0 12px rgba(255, 228, 140, 0.95))
-      drop-shadow(0 0 24px rgba(245, 197, 66, 0.55));
-    transform: scale(1.055);
-    opacity: 1;
-  }
-}
-.superTit i { font-style: normal; font-size: 8px; color: var(--ouro); filter: drop-shadow(0 0 5px rgba(245,197,66,.9)); }
-.superTit em { font-style: normal; opacity: 0.6; }
-.superTit b {
-  font-size: 1.45em;
+.superTrack b {
+  font-weight: 800;
   letter-spacing: 1px;
-  background: linear-gradient(180deg, #fff7e0, var(--ouro) 55%, #b8860b);
-  -webkit-background-clip: text; background-clip: text; color: transparent;
+  color: #ffe27a;
+}
+@keyframes correSuper {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 .letras {
   display: flex;
@@ -502,5 +504,5 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   #girar::after { animation: none; }   /* menos peso no celular, mas o emblema continua pulsando */
 }
 @media (prefers-reduced-motion: reduce) {
-  #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on, .superTit { animation: none; }
+  #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on, .superTrack { animation: none; }
 }
