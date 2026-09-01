@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <title>Fortune DUNKER</title>
+  <meta name="description" content="Caça-níquel só por diversão — créditos fictícios." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <meta name="theme-color" content="#0a0806" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="DUNKER" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="palco">
+  <div id="cabine">
+    <button id="som" aria-label="Ligar/desligar som">🔊</button>
+    <div id="marquise">
+      <div id="tickerWrap">
+        <div id="ticker">
+          <span>BOA SORTE&nbsp; ✦&nbsp; BOA SORTE&nbsp; ✦&nbsp; BOA SORTE&nbsp; ✦&nbsp; FORTUNE DUNKER&nbsp; ✦&nbsp; BOA SORTE&nbsp; ✦&nbsp; </span>
+          <span>BOA SORTE&nbsp; ✦&nbsp; BOA SORTE&nbsp; ✦&nbsp; BOA SORTE&nbsp; ✦&nbsp; FORTUNE DUNKER&nbsp; ✦&nbsp; BOA SORTE&nbsp; ✦&nbsp; </span>
+        </div>
+      </div>
+      <img id="emblema" src="emblema.png" alt="Fortune DUNKER" />
+    </div>
+
+    <h1><span class="g">FORTUNE</span> <span class="w">DUNKER</span></h1>
+
+    <div id="telaWrap">
+      <canvas id="tela" width="360" height="360"></canvas>
+    </div>
+
+    <section id="super">
+      <div class="superTit"><i>&#9670;</i> SUPER PRÊMIO <em>&#183;</em> <b>50 000</b> <i>&#9670;</i></div>
+      <div class="letras">
+        <span data-i="0">D</span><span data-i="1">U</span><span data-i="2">N</span><span data-i="3">K</span><span data-i="4">E</span><span data-i="5">R</span>
+      </div>
+    </section>
+
+    <div id="painel">
+      <div class="box">
+        <span class="rot">Créditos</span>
+        <span class="num" id="creditos">0</span>
+      </div>
+      <div class="box">
+        <span class="rot">Aposta / linha</span>
+        <div class="stepper">
+          <button id="apMenos" aria-label="Diminuir aposta">&minus;</button>
+          <span class="num" id="apostaLinha">10</span>
+          <button id="apMais" aria-label="Aumentar aposta">+</button>
+        </div>
+      </div>
+      <div class="box">
+        <span class="rot">Linhas</span>
+        <div class="stepper">
+          <button id="lnMenos" aria-label="Menos linhas">&minus;</button>
+          <span class="num" id="numLinhas">1</span>
+          <button id="lnMais" aria-label="Mais linhas">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="resumo">
+      <span>Aposta total <b id="apostaTotal">10</b></span>
+      <span>Último prêmio <b id="premio">0</b></span>
+    </div>
+
+    <div id="apostas">
+      <button class="dbtn" data-ap="0">1</button>
+      <button class="dbtn" data-ap="1">10</button>
+      <button class="dbtn" data-ap="2">20</button>
+      <button class="dbtn" data-ap="3">50</button>
+      <button class="dbtn" data-ap="4">100</button>
+      <button class="dbtn" data-ap="max">MAX BET</button>
+    </div>
+
+    <button id="girar"><span>GIRAR</span></button>
+    <p id="msg">Créditos são fictícios — só diversão.</p>
+    <button id="resetar">Reiniciar com 10000 créditos</button>
+
+    <footer id="rodape">desenvolvido por <b>DUNKER TECHNOLOGY</b></footer>
+  </div>
+  </div>
+
+  <div id="superOverlay" hidden>
+    <div class="txt">
+      SUPER PRÊMIO<br>
+      <b>+50 000</b><br>
+      <em>D · U · N · K · E · R</em>
+    </div>
+  </div>
+
+  <script src="som.js"></script>
+  <script src="game.js"></script>
+  <script>
+    if ("serviceWorker" in navigator) {
+      addEventListener("load", () => navigator.serviceWorker.register("sw.js").catch(() => {}));
+    }
+  </script>
+</body>
+</html>
