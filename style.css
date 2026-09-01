@@ -234,15 +234,32 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   text-align: center;
 }
 .superTit {
+  display: inline-block;
   font-size: 11px;
   letter-spacing: 3px;
   text-transform: uppercase;
   color: var(--ouro-claro);
+  transform-origin: center;
+  animation: pulsaSuperTit 1.7s ease-in-out infinite;
+}
+@keyframes pulsaSuperTit {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(245, 197, 66, 0.3));
+    transform: scale(1);
+    opacity: 0.9;
+  }
+  50% {
+    filter:
+      drop-shadow(0 0 12px rgba(255, 228, 140, 0.95))
+      drop-shadow(0 0 24px rgba(245, 197, 66, 0.55));
+    transform: scale(1.055);
+    opacity: 1;
+  }
 }
 .superTit i { font-style: normal; font-size: 8px; color: var(--ouro); filter: drop-shadow(0 0 5px rgba(245,197,66,.9)); }
 .superTit em { font-style: normal; opacity: 0.6; }
 .superTit b {
-  font-size: 1.4em;
+  font-size: 1.45em;
   letter-spacing: 1px;
   background: linear-gradient(180deg, #fff7e0, var(--ouro) 55%, #b8860b);
   -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -485,5 +502,5 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   #girar::after { animation: none; }   /* menos peso no celular, mas o emblema continua pulsando */
 }
 @media (prefers-reduced-motion: reduce) {
-  #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on { animation: none; }
+  #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on, .superTit { animation: none; }
 }
