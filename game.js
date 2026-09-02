@@ -890,27 +890,45 @@ function destravarSom() {
 
 // ---------- Escala automática: a cabine sempre cabe na tela ----------
 const cabineEl = document.getElementById("cabine");
+const NAT_W = 430;
+
+function inset(nome) {
+  const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(nome));
+  return Number.isFinite(v) ? v : 0;
+}
+
 function ajustarEscala() {
-  const vw = document.documentElement.clientWidth;
-  const vh = window.innerHeight;
-  const natW = 430;
+  const vv = window.visualViewport;
+  // área REAL disponível = viewport menos as margens seguras (notch/barra do app)
+  const vw = (vv ? vv.width : window.innerWidth) - inset("--sal") - inset("--sar");
+  const vh = (vv ? vv.height : window.innerHeight) - inset("--sat") - inset("--sab");
   const natH = cabineEl.offsetHeight; // transform não altera offsetHeight
-  // preenche a tela: escala pra encostar na largura OU na altura (o que travar primeiro)
-  let s = Math.min((vw - 6) / natW, (vh - 6) / natH);
-  s = Math.max(0.3, Math.min(s, 1.8)); // limite pra não borrar demais
+  if (!natH) return;
+
+  let s = Math.min((vw - 8) / NAT_W, (vh - 8) / natH);
+  s = Math.max(0.3, Math.min(s, 1.8));
+
   const root = document.body.style;
   root.setProperty("--escala", s);
-  root.setProperty("--cabW", natW * s + "px");
+  root.setProperty("--cabW", NAT_W * s + "px");
   root.setProperty("--cabH", natH * s + "px");
 }
+
+// roda em vários momentos: layout muda, fontes chegam, app abre em standalone, etc.
 addEventListener("resize", ajustarEscala);
-addEventListener("orientationchange", () => setTimeout(ajustarEscala, 120));
-addEventListener("load", ajustarEscala);
+addEventListener("orientationchange", () => setTimeout(ajustarEscala, 150));
+addEventListener("pageshow", ajustarEscala);
+if (window.visualViewport) {
+  visualViewport.addEventListener("resize", ajustarEscala);
+  visualViewport.addEventListener("scroll", ajustarEscala);
+}
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustarEscala);
 const embl = document.getElementById("emblema");
 if (embl) embl.addEventListener("load", ajustarEscala);
+addEventListener("load", ajustarEscala);
+requestAnimationFrame(() => requestAnimationFrame(ajustarEscala));
+[120, 350, 700, 1400].forEach((ms) => setTimeout(ajustarEscala, ms));
 ajustarEscala();
-setTimeout(ajustarEscala, 300); // reajuste após layout assentar
 
 atualizarPainel();
 requestAnimationFrame(loop);

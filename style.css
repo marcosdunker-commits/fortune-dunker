@@ -8,6 +8,11 @@
   --creme: #fff4d6;
   --azul: #56b8ff;
   --neon: 0 0 6px rgba(255, 212, 90, 0.8), 0 0 16px rgba(245, 197, 66, 0.45);
+  /* margens seguras (notch / barra) — lidas pelo JS pra escalar certo no modo app */
+  --sat: env(safe-area-inset-top, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+  --sar: env(safe-area-inset-right, 0px);
 }
 
 * { box-sizing: border-box; }
