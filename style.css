@@ -367,6 +367,32 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 }
 #resumo b { color: var(--creme); font-variant-numeric: tabular-nums; }
 
+/* ===================== RODADAS GRÁTIS ===================== */
+#gratis {
+  width: 100%;
+  padding: 7px 10px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #eafff0;
+  border-radius: 10px;
+  border: 1px solid rgba(74, 222, 128, 0.6);
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.18), rgba(0, 0, 0, 0.4));
+  box-shadow: 0 0 14px rgba(74, 222, 128, 0.4), inset 0 0 12px rgba(74, 222, 128, 0.15);
+  animation: pulsaGratis 1.3s ease-in-out infinite;
+}
+#gratis b {
+  font-size: 1.35em;
+  color: #7dffb0;
+  text-shadow: 0 0 10px rgba(74, 222, 128, 0.9);
+}
+@keyframes pulsaGratis {
+  0%, 100% { box-shadow: 0 0 10px rgba(74, 222, 128, 0.3), inset 0 0 12px rgba(74, 222, 128, 0.12); }
+  50% { box-shadow: 0 0 26px rgba(74, 222, 128, 0.8), inset 0 0 14px rgba(74, 222, 128, 0.2); }
+}
+
 /* ===================== BOTÃO GIRAR ===================== */
 #girar {
   position: relative;
@@ -525,5 +551,5 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   #girar::after { animation: none; }   /* menos peso no celular, mas o emblema continua pulsando */
 }
 @media (prefers-reduced-motion: reduce) {
-  #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on, .superTrack { animation: none; }
+  #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on, .superTrack, #gratis { animation: none; }
 }

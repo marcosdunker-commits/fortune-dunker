@@ -385,8 +385,13 @@ const APOSTAS = [1, 10, 20, 50, 100];
 let apostaIdx = 1;
 let numLinhas = 1;
 
+// rodadas grátis: sai com 4+ estrelas na grade; joga sem descontar a aposta
+const GATILHO_GRATIS = 4;      // quantas ⭐ pra ativar
+const RODADAS_GRATIS = 10;     // quantas rodadas ganha
+
 let creditos = carregarCreditos();
 let coletadas = carregarLetras();
+let girosGratis = carregarGratis();
 let girandoTudo = false;
 let linhasVencedoras = [];
 let flash = 0;
@@ -405,6 +410,9 @@ const el = {
   premio: document.getElementById("premio"),
   msg: document.getElementById("msg"),
   girar: document.getElementById("girar"),
+  girarTxt: document.querySelector("#girar span"),
+  gratis: document.getElementById("gratis"),
+  gratisN: document.getElementById("gratisN"),
   letras: [...document.querySelectorAll(".letras span")],
   deck: [...document.querySelectorAll(".dbtn[data-ap]")],
   overlay: document.getElementById("superOverlay"),
@@ -421,9 +429,14 @@ function carregarLetras() {
   } catch (e) { /* ignora */ }
   return [false, false, false, false, false, false];
 }
+function carregarGratis() {
+  const v = parseInt(localStorage.getItem("dunker.gratis"), 10);
+  return Number.isFinite(v) && v > 0 ? v : 0;
+}
 function salvar() {
   localStorage.setItem("dunker.creditos", String(creditos));
   localStorage.setItem("dunker.letras", JSON.stringify(coletadas));
+  localStorage.setItem("dunker.gratis", String(girosGratis));
 }
 
 const apostaLinha = () => APOSTAS[apostaIdx];
@@ -463,9 +476,16 @@ function atualizarPainel() {
   el.apostaLinha.textContent = apostaLinha();
   el.numLinhas.textContent = numLinhas;
   el.apostaTotal.textContent = fmt(apostaTotal());
-  el.girar.disabled = girandoTudo || creditos < apostaTotal();
+  el.girar.disabled = girandoTudo || (girosGratis === 0 && creditos < apostaTotal());
   el.letras.forEach((sp, i) => sp.classList.toggle("on", coletadas[i]));
   el.deck.forEach((b) => b.classList.toggle("sel", b.dataset.ap === String(apostaIdx)));
+
+  // rodadas grátis
+  if (el.gratis) {
+    el.gratis.hidden = girosGratis <= 0;
+    if (el.gratisN) el.gratisN.textContent = girosGratis;
+  }
+  if (el.girarTxt) el.girarTxt.textContent = girosGratis > 0 ? "GRÁTIS " + girosGratis : "GIRAR";
 }
 
 // ---------- Fogos ----------
@@ -494,10 +514,13 @@ function iniciarFogos() {
 
 // ---------- Girar ----------
 function girar() {
-  if (girandoTudo || creditos < apostaTotal()) return;
+  if (girandoTudo) return;
+  const gratis = girosGratis > 0;
+  if (!gratis && creditos < apostaTotal()) return;
 
   if (window.Som) { Som.iniciar(); Som.girou(); }
-  creditos -= apostaTotal();
+  if (gratis) girosGratis--;
+  else creditos -= apostaTotal();
   salvar();
   premioAlvo = 0;
   premioVis = 0;
@@ -581,6 +604,11 @@ function avaliar() {
     coletadas = [false, false, false, false, false, false];
   }
 
+  // rodadas grátis: 4+ ⭐ em qualquer lugar da grade
+  const estrelas = grade.reduce((tot, col) => tot + col.filter((s) => s === "estrela").length, 0);
+  const ganhouGratis = estrelas >= GATILHO_GRATIS;
+  if (ganhouGratis) girosGratis += RODADAS_GRATIS;
+
   creditos += ganho;
   salvar();
 
@@ -603,6 +631,15 @@ function avaliar() {
     el.msg.textContent = "Não foi dessa vez.";
     el.msg.className = "perdeu";
   }
+
+  if (ganhouGratis) {
+    el.msg.textContent = `🎁 ${RODADAS_GRATIS} RODADAS GRÁTIS!  (${estrelas}× ⭐)` +
+      (ganho > 0 ? `  +${ganho}` : "");
+    el.msg.className = "super";
+    flash = Math.max(flash, 70);
+    if (window.Som) Som.gratis();
+  }
+
   premioAlvo = ganho;   // a contagem no loop faz o número entrar
 
   if (creditos < APOSTAS[0]) {
@@ -831,6 +868,7 @@ document.getElementById("resetar").addEventListener("click", () => {
   creditosVis = 10000;
   premioAlvo = 0;
   premioVis = 0;
+  girosGratis = 0;
   coletadas = [false, false, false, false, false, false];
   salvar();
   el.premio.textContent = fmt(0);

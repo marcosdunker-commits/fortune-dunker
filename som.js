@@ -122,6 +122,18 @@ var Som = (() => {
     contagem(t + 1.0, durContagem(ganho || 50000));
     for (let k = 0; k < 10; k++) nota(1400 + Math.random() * 1800, t + 3.4 + k * 0.05, 0.22, "sine", 0.08);
   }
+  function gratis() {
+    if (!ligado || !ctx) return;
+    resumir();
+    const t = ctx.currentTime;
+    // arpejo subindo, alegre
+    [N.C, N.E, N.G, N.C6, N.E6, N.G6, N.C6 * 2].forEach((f, k) => {
+      nota(f, t + k * 0.07, 0.3, "triangle", 0.2);
+      nota(f * 2, t + k * 0.07, 0.15, "sine", 0.05);
+    });
+    // faíscas
+    for (let k = 0; k < 7; k++) nota(1600 + Math.random() * 1400, t + 0.55 + k * 0.05, 0.18, "sine", 0.09);
+  }
   function toggle() {
     ligado = !ligado;
     try { localStorage.setItem("dunker.som", ligado ? "1" : "0"); } catch (e) {}
@@ -136,6 +148,6 @@ var Som = (() => {
   function estaLigado() { return ligado; }
   function estado() { return ctx ? ctx.state : "sem-contexto"; }
 
-  return { iniciar, toggle, estaLigado, estado, girou, ganhou, super: superPremio };
+  return { iniciar, toggle, estaLigado, estado, girou, ganhou, gratis, super: superPremio };
 })();
 try { window.Som = Som; } catch (e) {}
