@@ -28,13 +28,14 @@ const LETRAS_POR_ROLO = [
 
 // s = tipo do símbolo desenhado; pag = prêmio [2, 3, 4, 5 iguais] × aposta da linha
 // (2 iguais paga pouquinho -> muitos prêmios pequenos toda hora)
+// pesos altos -> as letras D-U-N-K-E-R ficam mais raras (super prêmio mais difícil)
 const SIMBOLOS = [
-  { s: "sete",     peso: 3,  pag: [3, 20, 80, 400] },
-  { s: "diamante", peso: 5,  pag: [2, 12, 50, 200] },
-  { s: "estrela",  peso: 7,  pag: [1, 6, 25, 90] },
-  { s: "uva",      peso: 9,  pag: [1, 3, 12, 45] },
-  { s: "limao",    peso: 13, pag: [1, 2, 7, 22] },
-  { s: "cereja",   peso: 13, pag: [1, 2, 5, 16] },
+  { s: "sete",     peso: 5,  pag: [3, 20, 80, 400] },
+  { s: "diamante", peso: 8,  pag: [2, 12, 50, 200] },
+  { s: "estrela",  peso: 11, pag: [1, 6, 25, 90] },
+  { s: "uva",      peso: 15, pag: [1, 3, 12, 45] },
+  { s: "limao",    peso: 21, pag: [1, 2, 7, 22] },
+  { s: "cereja",   peso: 21, pag: [1, 2, 5, 16] },
 ];
 
 const LINHAS_PAG = [
@@ -46,7 +47,7 @@ const LINHAS_PAG = [
 ];
 const CORES_LINHA = ["#5ad1ff", "#4ade80", "#ff7b72", "#c084fc", "#ffd23f"];
 
-const SUPER_PREMIO = 50000;
+const SUPER_PREMIO = 10000;
 
 // ============================================================
 //  SÍMBOLOS EM VETOR — todos iluminados, pulsando e brilhando
