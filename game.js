@@ -29,13 +29,14 @@ const LETRAS_POR_ROLO = [
 // s = tipo do símbolo desenhado; pag = prêmio [2, 3, 4, 5 iguais] × aposta da linha
 // (2 iguais paga pouquinho -> muitos prêmios pequenos toda hora)
 // pesos altos -> as letras D-U-N-K-E-R ficam mais raras (super prêmio mais difícil)
+// estrela é o "scatter" das rodadas grátis -> peso baixo de propósito (ela é rara)
 const SIMBOLOS = [
   { s: "sete",     peso: 5,  pag: [3, 20, 80, 400] },
   { s: "diamante", peso: 8,  pag: [2, 12, 50, 200] },
-  { s: "estrela",  peso: 11, pag: [1, 6, 25, 90] },
+  { s: "estrela",  peso: 4,  pag: [1, 6, 25, 90] },
   { s: "uva",      peso: 15, pag: [1, 3, 12, 45] },
   { s: "limao",    peso: 21, pag: [1, 2, 7, 22] },
-  { s: "cereja",   peso: 21, pag: [1, 2, 5, 16] },
+  { s: "cereja",   peso: 28, pag: [1, 2, 5, 16] },
 ];
 
 const LINHAS_PAG = [
@@ -936,7 +937,8 @@ function inset(nome) {
   return Number.isFinite(v) ? v : 0;
 }
 
-function ajustarEscala() {
+let escalaAtual = 0;
+function calcularEscala() {
   const vv = window.visualViewport;
   // área REAL disponível = viewport menos as margens seguras (notch/barra do app)
   const vw = (vv ? vv.width : window.innerWidth) - inset("--sal") - inset("--sar");
@@ -947,10 +949,23 @@ function ajustarEscala() {
   let s = Math.min((vw - 8) / NAT_W, (vh - 8) / natH);
   s = Math.max(0.3, Math.min(s, 1.8));
 
+  // zona morta: ignora mudanças minúsculas (evita "tremer" reagindo a ruído
+  // do visualViewport durante a animação de abertura do app instalado)
+  if (Math.abs(s - escalaAtual) < 0.006) return;
+  escalaAtual = s;
+
   const root = document.body.style;
   root.setProperty("--escala", s);
   root.setProperty("--cabW", NAT_W * s + "px");
   root.setProperty("--cabH", natH * s + "px");
+}
+
+// agrupa chamadas próximas num só recálculo por frame
+let escalaAgendada = false;
+function ajustarEscala() {
+  if (escalaAgendada) return;
+  escalaAgendada = true;
+  requestAnimationFrame(() => { escalaAgendada = false; calcularEscala(); });
 }
 
 // roda em vários momentos: layout muda, fontes chegam, app abre em standalone, etc.
@@ -959,7 +974,8 @@ addEventListener("orientationchange", () => setTimeout(ajustarEscala, 150));
 addEventListener("pageshow", ajustarEscala);
 if (window.visualViewport) {
   visualViewport.addEventListener("resize", ajustarEscala);
-  visualViewport.addEventListener("scroll", ajustarEscala);
+  // (sem listener de "scroll": no app instalado ele dispara sozinho durante
+  // o bounce elástico do iOS e é essa a causa do tremor)
 }
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustarEscala);
 const embl = document.getElementById("emblema");
