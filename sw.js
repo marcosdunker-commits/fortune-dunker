@@ -1,4 +1,4 @@
-const CACHE = "dunker-v3";
+const CACHE = "dunker-v4";
 const ASSETS = [
   "./",
   "./index.html",
@@ -27,18 +27,19 @@ self.addEventListener("activate", (e) => {
   );
 });
 
-// stale-while-revalidate: responde do cache na hora e atualiza em segundo plano
+// rede primeiro: sempre busca a versão mais nova quando tem internet;
+// só usa o cache se estiver offline. Isso evita o app instalado mostrar
+// uma versão velha depois de eu publicar uma atualização.
 self.addEventListener("fetch", (e) => {
   if (e.request.method !== "GET") return;
   e.respondWith((async () => {
     const cache = await caches.open(CACHE);
-    const cached = await cache.match(e.request);
-    const net = fetch(e.request)
-      .then((res) => {
-        if (res && res.status === 200) cache.put(e.request, res.clone());
-        return res;
-      })
-      .catch(() => null);
-    return cached || (await net) || cache.match("./index.html");
+    try {
+      const res = await fetch(e.request);
+      if (res && res.status === 200) cache.put(e.request, res.clone());
+      return res;
+    } catch (err) {
+      return (await cache.match(e.request)) || cache.match("./index.html");
+    }
   })());
 });
