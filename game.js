@@ -929,29 +929,33 @@ function destravarSom() {
 );
 
 // ---------- Escala automática: a cabine sempre cabe na tela ----------
+//
+// Antes isto recalculava a área disponível a partir de window.innerHeight
+// menos as margens seguras lidas separadamente — duas contas independentes
+// que deviam bater mas nem sempre batiam (por isso às vezes sobrava ou
+// faltava espaço). Agora mede DIRETO a caixa real do <body> — a mesma caixa
+// que o flex usa pra centralizar a cabine — então não tem conta duplicada
+// pra desalinhar: o número usado É o número que o layout realmente usa.
 const cabineEl = document.getElementById("cabine");
+const embl = document.getElementById("emblema");
 const NAT_W = 430;
-
-function inset(nome) {
-  const v = parseFloat(getComputedStyle(document.documentElement).getPropertyValue(nome));
-  return Number.isFinite(v) ? v : 0;
-}
 
 let escalaAtual = 0;
 function calcularEscala() {
-  const vv = window.visualViewport;
-  // área REAL disponível = viewport menos as margens seguras (notch/barra do app)
-  const vw = (vv ? vv.width : window.innerWidth) - inset("--sal") - inset("--sar");
-  const vh = (vv ? vv.height : window.innerHeight) - inset("--sat") - inset("--sab");
+  const cs = getComputedStyle(document.body);
+  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  const vw = document.body.clientWidth - padX;
+  const vh = document.body.clientHeight - padY;
   const natH = cabineEl.offsetHeight; // transform não altera offsetHeight
-  if (!natH) return;
+  if (!natH || vw <= 0 || vh <= 0) return;
 
-  let s = Math.min((vw - 8) / NAT_W, (vh - 8) / natH);
+  let s = Math.min((vw - 4) / NAT_W, (vh - 4) / natH);
   s = Math.max(0.3, Math.min(s, 1.8));
 
-  // zona morta: ignora mudanças minúsculas (evita "tremer" reagindo a ruído
-  // do visualViewport durante a animação de abertura do app instalado)
-  if (Math.abs(s - escalaAtual) < 0.006) return;
+  // zona morta: ignora mudanças minúsculas (evita "tremer" reagindo a
+  // ruído de sub-pixel durante a animação de abertura do app instalado)
+  if (Math.abs(s - escalaAtual) < 0.004) return;
   escalaAtual = s;
 
   const root = document.body.style;
@@ -968,21 +972,24 @@ function ajustarEscala() {
   requestAnimationFrame(() => { escalaAgendada = false; calcularEscala(); });
 }
 
-// roda em vários momentos: layout muda, fontes chegam, app abre em standalone, etc.
-addEventListener("resize", ajustarEscala);
-addEventListener("orientationchange", () => setTimeout(ajustarEscala, 150));
-addEventListener("pageshow", ajustarEscala);
-if (window.visualViewport) {
-  visualViewport.addEventListener("resize", ajustarEscala);
-  // (sem listener de "scroll": no app instalado ele dispara sozinho durante
-  // o bounce elástico do iOS e é essa a causa do tremor)
+// gatilho principal: observa a caixa real do body e da cabine.
+// isso cobre TODO caso que muda o tamanho disponível (rotação, teclado,
+// barra do navegador recolhendo, o app assentando ao abrir, fonte
+// trocando de largura) sem precisar adivinhar em quais eventos confiar.
+if (window.ResizeObserver) {
+  const ro = new ResizeObserver(ajustarEscala);
+  ro.observe(document.body);
+  ro.observe(cabineEl);
+} else {
+  // navegador bem antigo sem ResizeObserver: cai pra escuta manual
+  addEventListener("resize", ajustarEscala);
+  addEventListener("orientationchange", () => setTimeout(ajustarEscala, 150));
 }
+addEventListener("pageshow", ajustarEscala);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(ajustarEscala);
-const embl = document.getElementById("emblema");
 if (embl) embl.addEventListener("load", ajustarEscala);
 addEventListener("load", ajustarEscala);
 requestAnimationFrame(() => requestAnimationFrame(ajustarEscala));
-[120, 350, 700, 1400].forEach((ms) => setTimeout(ajustarEscala, ms));
 ajustarEscala();
 
 atualizarPainel();
