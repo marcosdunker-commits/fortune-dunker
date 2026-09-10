@@ -584,26 +584,71 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   display: grid; place-items: center;
   z-index: 60;
   pointer-events: none;
-  background: radial-gradient(circle at 50% 45%, rgba(245, 197, 66, 0.4), rgba(20, 16, 10, 0.35) 45%, transparent 72%);
-  animation: flashSuper 0.5s ease-out 6 alternate;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 45%, rgba(255, 225, 150, 0.55), rgba(245, 197, 66, 0.22) 42%, rgba(10, 8, 5, 0.6) 74%);
+  animation: flashSuper 0.45s ease-out 8 alternate;
+}
+/* raios de luz dourados girando atrás do texto */
+#superOverlay::before {
+  content: "";
+  position: absolute;
+  inset: -60%;
+  background: repeating-conic-gradient(rgba(255, 232, 160, 0.4) 0deg 4deg, transparent 4deg 18deg);
+  animation: giraRaios 7s linear infinite;
+  mix-blend-mode: screen;
+}
+/* clarão branco que estoura no instante em que ganha */
+#superOverlay::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 45%, #fff, rgba(255, 232, 160, 0.7) 32%, transparent 68%);
+  animation: estouraFlash 0.8s ease-out forwards;
 }
 #superOverlay .txt {
+  position: relative;
+  z-index: 1;
   text-align: center;
   font-size: clamp(28px, 7vw, 54px);
   font-weight: 800;
   letter-spacing: 2px;
   color: var(--ouro-claro);
-  text-shadow: 0 0 18px rgba(245, 197, 66, 0.9), 0 0 40px rgba(255, 120, 40, 0.6);
-  animation: saltaSuper 0.6s cubic-bezier(0.2, 1.4, 0.4, 1);
+  text-shadow:
+    0 0 18px rgba(245, 197, 66, 0.9),
+    0 0 40px rgba(255, 120, 40, 0.6),
+    0 0 90px rgba(255, 210, 110, 0.55);
+  animation: saltaSuper 0.65s cubic-bezier(0.2, 1.4, 0.4, 1),
+             pulsaTextoSuper 1.15s ease-in-out 0.65s infinite;
 }
 #superOverlay .txt b { display: inline-block; font-size: 1.4em; color: #fff; }
 #superOverlay .txt em { font-size: 0.5em; letter-spacing: 8px; opacity: 0.9; font-style: normal; }
+/* moedas/estrelas caindo pela tela inteira, geradas via JS */
+.moeda {
+  position: absolute;
+  top: -8%;
+  color: var(--ouro-claro);
+  text-shadow: 0 0 8px rgba(245, 197, 66, 0.9), 0 0 16px rgba(255, 180, 60, 0.6);
+  animation: caiMoeda var(--dur) cubic-bezier(0.4, 0, 0.7, 1) var(--atraso) forwards;
+}
 @keyframes flashSuper { from { opacity: 0.35; } to { opacity: 1; } }
-@keyframes saltaSuper { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes saltaSuper {
+  0%   { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+  60%  { transform: scale(1.14) rotate(3deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes pulsaTextoSuper { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.4); } }
+@keyframes giraRaios { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes estouraFlash { 0% { opacity: 1; transform: scale(0.15); } 100% { opacity: 0; transform: scale(1.5); } }
+@keyframes caiMoeda {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 0; }
+  8%   { opacity: 1; }
+  100% { transform: translateY(115vh) rotate(var(--rot)); opacity: 0.2; }
+}
 
 @media (hover: none) {
   #girar::after { animation: none; }   /* menos peso no celular, mas o emblema continua pulsando */
 }
 @media (prefers-reduced-motion: reduce) {
-  #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on, .superTrack, #gratis { animation: none; }
+  #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on, .superTrack, #gratis,
+  #superOverlay, #superOverlay::before, #superOverlay::after, #superOverlay .txt, .moeda { animation: none; }
 }

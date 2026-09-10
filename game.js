@@ -657,14 +657,37 @@ function avaliar() {
   atualizarPainel();
 }
 
+// chuva de moedas/estrelas caindo pela tela inteira -- só no super prêmio
+const GLIFOS_CHUVA = ["✦", "★", "◆", "🪙"]; // ✦ ★ ◆ 🪙
+function chuvaDeMoedas() {
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < 28; i++) {
+    const s = document.createElement("span");
+    s.className = "moeda";
+    s.textContent = GLIFOS_CHUVA[Math.floor(Math.random() * GLIFOS_CHUVA.length)];
+    s.style.left = (Math.random() * 100).toFixed(1) + "%";
+    s.style.fontSize = (14 + Math.random() * 18).toFixed(0) + "px";
+    s.style.setProperty("--dur", (2.4 + Math.random() * 2).toFixed(2) + "s");
+    s.style.setProperty("--atraso", (Math.random() * 1.1).toFixed(2) + "s");
+    s.style.setProperty("--rot", ((Math.random() < 0.5 ? -1 : 1) * (240 + Math.random() * 420)).toFixed(0) + "deg");
+    frag.appendChild(s);
+  }
+  el.overlay.appendChild(frag);
+}
+
 let overlayTimer = 0;
 function mostrarOverlaySuper() {
+  el.overlay.querySelectorAll(".moeda").forEach((n) => n.remove());
   el.overlay.hidden = false;
   el.overlay.style.animation = "none";
   void el.overlay.offsetWidth;
   el.overlay.style.animation = "";
+  chuvaDeMoedas();
   clearTimeout(overlayTimer);
-  overlayTimer = setTimeout(() => { el.overlay.hidden = true; }, 4300);
+  overlayTimer = setTimeout(() => {
+    el.overlay.hidden = true;
+    el.overlay.querySelectorAll(".moeda").forEach((n) => n.remove());
+  }, 5200);
 }
 
 // ---------- Loop ----------
@@ -871,16 +894,12 @@ document.getElementById("lnMais").addEventListener("click", () => {
   numLinhas = Math.min(LINHAS_PAG.length, numLinhas + 1); linhasFlash = 90; atualizarPainel();
 });
 document.getElementById("resetar").addEventListener("click", () => {
-  creditos = 10000;
-  creditosVis = 10000;
-  premioAlvo = 0;
-  premioVis = 0;
-  girosGratis = 0;
-  coletadas = [false, false, false, false, false, false];
+  // só recarrega o valor -- rodadas grátis e letras coletadas continuam do
+  // jeito que estavam, ninguém quer perder o progresso do super prêmio
+  creditos += 5000;
   salvar();
-  el.premio.textContent = fmt(0);
-  el.msg.textContent = "Reiniciado. Boa sorte!";
-  el.msg.className = "";
+  el.msg.textContent = "Recarregou R$ 5.000!";
+  el.msg.className = "ganhou";
   atualizarPainel();
 });
 
