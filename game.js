@@ -30,18 +30,17 @@ const LETRAS_POR_ROLO = [
 // (2 iguais paga pouquinho -> muitos prêmios pequenos toda hora)
 // pesos altos -> as letras D-U-N-K-E-R ficam mais raras (super prêmio mais difícil)
 // estrela é o "scatter" das rodadas grátis -> peso baixo de propósito (ela é rara)
-// (o total (243) e o peso da estrela (12) ficam fixos -> não mexe na raridade
-// da estrela (rodadas grátis) nem na diluição das letras (super prêmio).
-// só redistribuímos entre os outros 5 símbolos, concentrando mais peso nos
-// baratos, pra dar match com mais frequência; e os prêmios (pag) subiram
-// ~50% -> ganhar nas rodadas normais ficou bem mais fácil e mais gordo)
+// (as proporções entre os 6 símbolos (inclusive a fração da estrela em
+// relação ao total) ficam iguais -> chance das rodadas grátis e frequência
+// dos prêmios normais não mudam. Só o TOTAL caiu de 243 pra 163 -> as
+// letras D-U-N-K-E-R ficam menos diluídas -> super prêmio um pouco mais fácil)
 const SIMBOLOS = [
-  { s: "sete",     peso: 10, pag: [5, 30, 120, 600] },
-  { s: "diamante", peso: 16, pag: [3, 18, 75, 300] },
-  { s: "estrela",  peso: 12, pag: [2, 9, 38, 135] },
-  { s: "uva",      peso: 35, pag: [2, 5, 18, 68] },
-  { s: "limao",    peso: 70, pag: [2, 3, 11, 33] },
-  { s: "cereja",   peso: 100, pag: [2, 3, 8, 24] },
+  { s: "sete",     peso: 7,  pag: [5, 30, 120, 600] },
+  { s: "diamante", peso: 11, pag: [3, 18, 75, 300] },
+  { s: "estrela",  peso: 8,  pag: [2, 9, 38, 135] },
+  { s: "uva",      peso: 23, pag: [2, 5, 18, 68] },
+  { s: "limao",    peso: 47, pag: [2, 3, 11, 33] },
+  { s: "cereja",   peso: 67, pag: [2, 3, 8, 24] },
 ];
 
 const LINHAS_PAG = [
