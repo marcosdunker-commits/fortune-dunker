@@ -30,13 +30,16 @@ const LETRAS_POR_ROLO = [
 // (2 iguais paga pouquinho -> muitos prêmios pequenos toda hora)
 // pesos altos -> as letras D-U-N-K-E-R ficam mais raras (super prêmio mais difícil)
 // estrela é o "scatter" das rodadas grátis -> peso baixo de propósito (ela é rara)
+// (as proporções entre os 6 símbolos abaixo definem as chances de vitória nas
+// linhas; foram só multiplicadas por 3 pra diluir as letras, que têm quantidade
+// fixa por rolo -> super prêmio ~3x mais difícil sem mudar o quanto cada linha paga)
 const SIMBOLOS = [
-  { s: "sete",     peso: 5,  pag: [3, 20, 80, 400] },
-  { s: "diamante", peso: 8,  pag: [2, 12, 50, 200] },
-  { s: "estrela",  peso: 4,  pag: [1, 6, 25, 90] },
-  { s: "uva",      peso: 15, pag: [1, 3, 12, 45] },
-  { s: "limao",    peso: 21, pag: [1, 2, 7, 22] },
-  { s: "cereja",   peso: 28, pag: [1, 2, 5, 16] },
+  { s: "sete",     peso: 15, pag: [3, 20, 80, 400] },
+  { s: "diamante", peso: 24, pag: [2, 12, 50, 200] },
+  { s: "estrela",  peso: 12, pag: [1, 6, 25, 90] },
+  { s: "uva",      peso: 45, pag: [1, 3, 12, 45] },
+  { s: "limao",    peso: 63, pag: [1, 2, 7, 22] },
+  { s: "cereja",   peso: 84, pag: [1, 2, 5, 16] },
 ];
 
 const LINHAS_PAG = [
@@ -387,8 +390,9 @@ const APOSTAS = [1, 10, 20, 50, 100];
 let apostaIdx = 1;
 let numLinhas = 1;
 
-// rodadas grátis: sai com 4+ estrelas na grade; joga sem descontar a aposta
-const GATILHO_GRATIS = 4;      // quantas ⭐ pra ativar
+// rodadas grátis: sai com 5+ estrelas na grade; joga sem descontar a aposta
+// (5 de 25 células, ~1% de chance por giro -> bem mais difícil de sair)
+const GATILHO_GRATIS = 5;      // quantas ⭐ pra ativar
 const RODADAS_GRATIS = 10;     // quantas rodadas ganha
 
 let creditos = carregarCreditos();
