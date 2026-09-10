@@ -8,18 +8,16 @@
   --creme: #fff4d6;
   --azul: #56b8ff;
   --neon: 0 0 6px rgba(255, 212, 90, 0.8), 0 0 16px rgba(245, 197, 66, 0.45);
-  /* margens seguras (notch / barra) — lidas pelo JS pra escalar certo no modo app */
-  --sat: env(safe-area-inset-top, 0px);
-  --sab: env(safe-area-inset-bottom, 0px);
-  --sal: env(safe-area-inset-left, 0px);
-  --sar: env(safe-area-inset-right, 0px);
 }
 
 * { box-sizing: border-box; }
 html {
   -webkit-text-size-adjust: 100%;
   height: 100%;
-  overflow: hidden;
+  overflow-x: hidden;
+  /* deixa rolar no eixo Y só como rede de segurança (tela extremamente
+     baixa, ex. celular deitado) — no caso normal não sobra nada pra rolar */
+  overflow-y: auto;
   overscroll-behavior: none;
 }
 
@@ -39,21 +37,20 @@ body {
   -webkit-tap-highlight-color: transparent;
   -webkit-user-select: none;
   user-select: none;
-  overflow: hidden;                  /* a cabine é escalada pra caber; nada de rolar */
 }
 
-/* palco: reserva o espaço da cabine já escalada (JS calcula) */
+/* palco: molde do tamanho máximo da cabine. Sem JS nenhum: a cabine
+   fluida (ver #cabine/#telaWrap/#tela abaixo) se ajusta sozinha a
+   qualquer proporção de tela, minimizando sobra nas laterais. */
 #palco {
   position: relative;
-  width: var(--cabW, 430px);
-  height: var(--cabH, 90dvh);
+  width: min(100%, 480px);
+  height: 100%;
+  max-height: 960px;
 }
 #palco > #cabine {
-  position: absolute;
-  top: 0;
-  left: 50%;
-  transform-origin: top center;
-  transform: translateX(-50%) scale(var(--escala, 1));
+  width: 100%;
+  height: 100%;
 }
 body::before {
   content: "";
@@ -67,7 +64,9 @@ button { font-family: inherit; cursor: pointer; }
 
 /* ===================== CABINE ===================== */
 #cabine {
-  width: 430px;
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -251,19 +250,29 @@ h1 .g {
 }
 h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 
-/* ---- janela dos rolos ---- */
+/* ---- janela dos rolos ----
+   flex:1 faz essa caixa absorver toda sobra vertical da cabine; dentro
+   dela, container queries (cqw/cqh) calculam o maior quadrado que cabe
+   nesse espaço -- isso substitui o antigo cálculo de escala via JS e
+   funciona igual em qualquer proporção de tela, sem nenhum código. */
 #telaWrap {
   width: 100%;
+  flex: 1 1 auto;
+  min-height: 90px;
+  container-type: size;
   padding: 7px;
   border: 2px solid var(--ouro);
   border-radius: 12px;
   background: #080706;
   box-shadow: var(--neon), inset 0 0 24px rgba(0, 0, 0, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 #tela {
   display: block;
-  width: 100%;
-  height: auto;
+  width: min(100cqw, 100cqh);
+  height: min(100cqw, 100cqh);
   aspect-ratio: 1 / 1;
   border-radius: 5px;
   background: #0a0908;
@@ -369,6 +378,7 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 #painel { width: 100%; display: flex; gap: 6px; }
 .box {
   flex: 1;
+  min-width: 0;
   padding: 5px 4px;
   text-align: center;
   border: 1px solid rgba(245, 197, 66, 0.4);
@@ -543,9 +553,10 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 #apostas {
   width: 100%;
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 5px;
 }
+.dbtn { min-width: 0; }
 .dbtn {
   padding: 10px 2px;
   font-size: 12px;
