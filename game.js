@@ -1,5 +1,5 @@
 // ============================================================
-//  Fortune DUNKER — caça-níquel 5×5, estilo "tigrinho".
+//  Fortune DUNKER — caça-níquel 6×5, estilo "tigrinho".
 //  Símbolos desenhados em vetor (nítidos em qualquer resolução).
 //  Valores ficticios, sem dinheiro real, so diversao.
 // ============================================================
@@ -7,11 +7,11 @@
 const canvas = document.getElementById("tela");
 const ctx = canvas.getContext("2d");
 
-const NUM_ROLOS = 5;
+const NUM_ROLOS = 6;
 const LINHAS_VIS = 5;
-const LARG = 360;                 // tamanho lógico (o CSS cuida do tamanho na tela)
+const LARG = 432;                 // tamanho lógico (o CSS cuida do tamanho na tela)
 const ALT = 360;
-const CELULA = LARG / NUM_ROLOS;  // 72
+const CELULA = LARG / NUM_ROLOS;  // 72 -- mesmo tamanho de célula de sempre
 const RAIO = CELULA * 0.38;
 
 // resolução real = lógico × densidade de pixels do aparelho (retina/celular)
@@ -21,47 +21,57 @@ canvas.height = ALT * DPR;
 ctx.scale(DPR, DPR);
 
 const LETRAS = ["D", "U", "N", "K", "E", "R"];
-// Poucas letras e espalhadas: o super prêmio tem que custar a sair.
+// 6 rolos, 6 letras -- uma por rolo, cada letra com sua própria chance.
 const LETRAS_POR_ROLO = [
-  ["D", "R"], ["U"], ["N"], ["K"], ["E"],
+  ["D"], ["U"], ["N"], ["K"], ["E"], ["R"],
 ];
 
-// s = tipo do símbolo desenhado; pag = prêmio [2, 3, 4, 5 iguais] × aposta da linha
+// s = tipo do símbolo desenhado; pag = prêmio [2, 3, 4, 5, 6 iguais] × aposta da linha
 // (2 iguais paga pouquinho -> muitos prêmios pequenos toda hora)
 // pesos altos -> as letras D-U-N-K-E-R ficam mais raras (super prêmio mais difícil)
 // estrela é o "scatter" das rodadas grátis -> peso baixo de propósito (ela é rara)
-// (as proporções entre os 6 símbolos (inclusive a fração da estrela em
-// relação ao total) ficam iguais -> chance das rodadas grátis e frequência
-// dos prêmios normais não mudam. Só o TOTAL caiu de 243 pra 163 -> as
-// letras D-U-N-K-E-R ficam menos diluídas -> super prêmio um pouco mais fácil)
+// coroa e sino são os símbolos novos da grade 6x5 (coroa = premium, acima do
+// sete/diamante; sino = intermediário, entre o diamante e a uva). Os pesos
+// dos símbolos que já existiam ficaram com o mesmo valor absoluto de antes;
+// só a estrela subiu um pouco (8->9) pra compensar a diluição de ter 2
+// categorias novas no baralho e manter a fração dela quase idêntica ->
+// chance das rodadas grátis não muda.
 const SIMBOLOS = [
-  { s: "sete",     peso: 7,  pag: [5, 30, 120, 600] },
-  { s: "diamante", peso: 11, pag: [3, 18, 75, 300] },
-  { s: "estrela",  peso: 8,  pag: [2, 9, 38, 135] },
-  { s: "uva",      peso: 23, pag: [2, 5, 18, 68] },
-  { s: "limao",    peso: 47, pag: [2, 3, 11, 33] },
-  { s: "cereja",   peso: 67, pag: [2, 3, 8, 24] },
+  { s: "coroa",    peso: 5,  pag: [8, 50, 200, 900, 4000] },
+  { s: "sete",     peso: 7,  pag: [5, 30, 120, 600, 3000] },
+  { s: "diamante", peso: 11, pag: [3, 18, 75, 300, 1200] },
+  { s: "estrela",  peso: 9,  pag: [2, 9, 38, 135, 450] },
+  { s: "sino",     peso: 12, pag: [3, 12, 45, 160, 550] },
+  { s: "uva",      peso: 23, pag: [2, 5, 18, 68, 230] },
+  { s: "limao",    peso: 47, pag: [2, 3, 11, 33, 95] },
+  { s: "cereja",   peso: 67, pag: [2, 3, 8, 24, 65] },
 ];
 
+// diagonais numa grade 6 colunas x 5 linhas: como não dá pra dividir igual,
+// a linha de cada coluna é calculada por interpolação arredondada
+// (round(i * 4/5)) pra continuar parecendo uma diagonal de verdade.
+const DIAG_DESCE = Array.from({ length: NUM_ROLOS }, (_, i) => Math.round(i * (LINHAS_VIS - 1) / (NUM_ROLOS - 1)));
 const LINHAS_PAG = [
-  [2, 2, 2, 2, 2], // meio
-  [0, 0, 0, 0, 0], // topo
-  [4, 4, 4, 4, 4], // base
-  [0, 1, 2, 3, 4], // diagonal \
-  [4, 3, 2, 1, 0], // diagonal /
+  [2, 2, 2, 2, 2, 2], // meio
+  [0, 0, 0, 0, 0, 0], // topo
+  [4, 4, 4, 4, 4, 4], // base
+  DIAG_DESCE,                        // diagonal \
+  [...DIAG_DESCE].reverse(),         // diagonal /
 ];
 const CORES_LINHA = ["#5ad1ff", "#4ade80", "#ff7b72", "#c084fc", "#ffd23f"];
 
-const SUPER_PREMIO = 10000;
+const SUPER_PREMIO = 5000;
 
 // ============================================================
 //  SÍMBOLOS EM VETOR — todos iluminados, pulsando e brilhando
 // ============================================================
-const FASE = { sete: 0, diamante: 1, estrela: 2, uva: 3, limao: 4, cereja: 5 };
+const FASE = { coroa: 0, sete: 1, diamante: 2, estrela: 3, sino: 4, uva: 5, limao: 6, cereja: 7 };
 const HALO = {
+  coroa: "255,215,90",
   sete: "255,70,70",
   diamante: "120,220,255",
   estrela: "255,215,90",
+  sino: "255,200,110",
   uva: "190,120,255",
   limao: "255,225,80",
   cereja: "255,80,90",
@@ -314,6 +324,96 @@ function desenhaUva(g, R, t, pulso) {
   cintila(g, -R * 0.2, -R * 0.15, R * (0.14 + 0.12 * pulso), "#e8d4ff");
 }
 
+function desenhaCoroa(g, R, t, pulso) {
+  const pts = [
+    [-0.85, 0.85], [-0.85, 0.08],
+    [-0.5, 0.48], [-0.28, -0.42],
+    [-0.08, 0.28], [0, -0.85],
+    [0.08, 0.28], [0.28, -0.42],
+    [0.5, 0.48], [0.85, 0.08],
+    [0.85, 0.85],
+  ];
+  const gr = g.createLinearGradient(0, -R, 0, R * 0.85);
+  gr.addColorStop(0, "#fff7d6");
+  gr.addColorStop(0.5, "#ffd23f");
+  gr.addColorStop(1, "#a9791a");
+  g.save();
+  g.shadowColor = `rgba(255,215,90,${0.5 + 0.45 * pulso})`;
+  g.shadowBlur = R * (0.35 + 0.7 * pulso);
+  poligono(g, pts, R);
+  g.fillStyle = gr;
+  g.fill();
+  g.restore();
+  g.lineWidth = R * 0.07;
+  g.strokeStyle = "#fff6da";
+  poligono(g, pts, R);
+  g.stroke();
+  g.fillStyle = "rgba(255,255,255,0.18)";
+  g.fillRect(-R * 0.85, R * 0.42, R * 1.7, R * 0.12);
+  // brilho que desliza
+  g.save();
+  poligono(g, pts, R);
+  g.clip();
+  const off = ((t / 700) % 2 - 1) * 1.6 * R;
+  g.globalCompositeOperation = "lighter";
+  g.strokeStyle = "rgba(255,255,255,0.5)";
+  g.lineWidth = R * 0.18;
+  g.beginPath();
+  g.moveTo(-R + off, -R);
+  g.lineTo(off, R);
+  g.stroke();
+  g.restore();
+  // joias coloridas nas pontas -- combina com o resto do jogo, que já é
+  // dourado; aqui dá o toque "mais colorido" que foi pedido
+  const h = Math.sin(t / 300) * R * 0.04;
+  esferaBrilhante(g, -R * 0.28, -R * 0.42 + h, R * 0.16, "#ff9a9a", "#e0303a", "#7a0f16", 0, 0);
+  esferaBrilhante(g, 0, -R * 0.85 + h, R * 0.18, "#b9ffe0", "#22c98a", "#0d6b47", 0, 0);
+  esferaBrilhante(g, R * 0.28, -R * 0.42 + h, R * 0.16, "#9adcff", "#2196e0", "#0d4f7a", 0, 0);
+  cintila(g, -R * 0.5, 0.1 * R, R * (0.16 + 0.14 * pulso));
+}
+
+function desenhaSino(g, R, t, pulso) {
+  g.save();
+  g.shadowColor = `rgba(255,200,110,${0.4 + 0.4 * pulso})`;
+  g.shadowBlur = R * 0.5 * pulso;
+  g.beginPath();
+  g.moveTo(-R * 0.12, -R * 0.7);
+  g.quadraticCurveTo(-R * 0.72, -R * 0.05, -R * 0.6, R * 0.42);
+  g.lineTo(-R * 0.85, R * 0.55);
+  g.quadraticCurveTo(0, R * 0.78, R * 0.85, R * 0.55);
+  g.lineTo(R * 0.6, R * 0.42);
+  g.quadraticCurveTo(R * 0.72, -R * 0.05, R * 0.12, -R * 0.7);
+  g.closePath();
+  const gr = g.createLinearGradient(0, -R * 0.7, 0, R * 0.78);
+  gr.addColorStop(0, "#fff6b0");
+  gr.addColorStop(0.55, "#ffcf3f");
+  gr.addColorStop(1, "#b8790f");
+  g.fillStyle = gr;
+  g.fill();
+  g.restore();
+  g.lineWidth = R * 0.07;
+  g.strokeStyle = "#fff2c0";
+  g.stroke();
+  // alça
+  g.fillStyle = "#e0a70c";
+  g.beginPath();
+  g.arc(0, -R * 0.82, R * 0.11, 0, Math.PI * 2);
+  g.fill();
+  // boca do sino (fenda escura)
+  g.fillStyle = "#5a3b06";
+  g.beginPath();
+  g.ellipse(0, R * 0.55, R * 0.62, R * 0.12, 0, 0, Math.PI * 2);
+  g.fill();
+  // badalo balançando
+  const bob = Math.sin(t / 260) * R * 0.05;
+  esferaBrilhante(g, bob, R * 0.5, R * 0.13, "#fff3c4", "#c98a1a", "#7a5410", 0, 0);
+  g.fillStyle = "rgba(255,255,255,0.4)";
+  g.beginPath();
+  g.ellipse(-R * 0.28, -R * 0.1, R * 0.14, R * 0.32, -0.3, 0, Math.PI * 2);
+  g.fill();
+  cintila(g, R * 0.4, -R * 0.3, R * (0.16 + 0.14 * pulso));
+}
+
 function desenharSimbolo(g, tipo, cx, cy, R, t) {
   const fase = (FASE[tipo] || 0) * 1.15;
   const resp = 1 + 0.055 * Math.sin(t / 360 + fase);
@@ -343,6 +443,8 @@ function desenharSimbolo(g, tipo, cx, cy, R, t) {
   else if (tipo === "cereja") desenhaCereja(g, R, t, pulso);
   else if (tipo === "limao") desenhaLimao(g, R, t, pulso);
   else if (tipo === "uva") desenhaUva(g, R, t, pulso);
+  else if (tipo === "coroa") desenhaCoroa(g, R, t, pulso);
+  else if (tipo === "sino") desenhaSino(g, R, t, pulso);
 
   g.restore();
 }
@@ -391,15 +493,17 @@ const APOSTAS = [1, 10, 20, 50, 100];
 let apostaIdx = 1;
 let numLinhas = 1;
 
-// rodadas grátis: sai com 5+ estrelas na grade; joga sem descontar a aposta
-// (5 de 25 células, ~1% de chance por giro -> bem mais difícil de sair)
-const GATILHO_GRATIS = 5;      // quantas ⭐ pra ativar
+// rodadas grátis: sai com 6+ estrelas na grade; joga sem descontar a aposta
+// (grade cresceu de 25 pra 30 células -- gatilho sobe na mesma proporção
+// (5 * 30/25 = 6) pra manter a mesma dificuldade de sempre)
+const GATILHO_GRATIS = 6;      // quantas ⭐ pra ativar
 const RODADAS_GRATIS = 10;     // quantas rodadas ganha
 
 let creditos = carregarCreditos();
 let coletadas = carregarLetras();
 let girosGratis = carregarGratis();
 let girandoTudo = false;
+let sacarAberto = false; // formulário de "saque" (chave PIX) aberto?
 let linhasVencedoras = [];
 let flash = 0;
 let linhasFlash = 0; // realça as linhas ativas quando o jogador muda a quantidade
@@ -424,6 +528,9 @@ const el = {
   deck: [...document.querySelectorAll(".dbtn[data-ap]")],
   overlay: document.getElementById("superOverlay"),
   resetar: document.getElementById("resetar"),
+  sacarBtn: document.getElementById("sacarBtn"),
+  sacarForm: document.getElementById("sacarForm"),
+  pixChave: document.getElementById("pixChave"),
 };
 
 function carregarCreditos() {
@@ -485,7 +592,13 @@ function atualizarPainel() {
   el.numLinhas.textContent = numLinhas;
   el.apostaTotal.textContent = fmt(apostaTotal());
   el.girar.disabled = girandoTudo || (girosGratis === 0 && creditos < apostaTotal());
-  if (el.resetar) el.resetar.disabled = creditos > 0;
+  // "Sacar" e "Recarregar" nunca aparecem juntos: com saldo, só dá pra
+  // sacar; zerado, só dá pra recarregar.
+  const podeSacar = creditos > 0;
+  if (el.resetar) el.resetar.hidden = podeSacar;
+  if (el.sacarBtn) el.sacarBtn.hidden = !podeSacar || sacarAberto;
+  if (el.sacarForm) el.sacarForm.hidden = !sacarAberto;
+  if (el.sacarBtn) el.sacarBtn.textContent = "\u{1F4B8} Sacar " + fmt(creditos);
   el.letras.forEach((sp, i) => sp.classList.toggle("on", coletadas[i]));
   el.deck.forEach((b) => b.classList.toggle("sel", b.dataset.ap === String(apostaIdx)));
 
@@ -903,6 +1016,40 @@ document.getElementById("resetar").addEventListener("click", () => {
   creditos += 5000;
   salvar();
   el.msg.textContent = "Recarregou R$ 5.000!";
+  el.msg.className = "ganhou";
+  atualizarPainel();
+});
+
+// ---------- Saque (fictício) ----------
+// Tudo aqui é só de brincadeira: a chave PIX digitada nunca é salva nem
+// enviada pra lugar nenhum (nem localStorage) -- serve só pra dar aquele
+// clima de "saque de verdade" antes de zerar o valor fictício.
+if (el.sacarBtn) {
+  el.sacarBtn.addEventListener("click", () => {
+    if (creditos <= 0) return;
+    sacarAberto = true;
+    atualizarPainel();
+    if (el.pixChave) el.pixChave.focus();
+  });
+}
+document.getElementById("pixCancelar")?.addEventListener("click", () => {
+  sacarAberto = false;
+  if (el.pixChave) el.pixChave.value = "";
+  atualizarPainel();
+});
+document.getElementById("pixConfirmar")?.addEventListener("click", () => {
+  const chave = el.pixChave ? el.pixChave.value.trim() : "";
+  if (!chave) {
+    if (el.pixChave) el.pixChave.focus();
+    return;
+  }
+  const valor = creditos;
+  creditos = 0;
+  creditosVis = 0;
+  sacarAberto = false;
+  if (el.pixChave) el.pixChave.value = "";
+  salvar();
+  el.msg.textContent = `💸 Saque de ${fmt(valor)} realizado com sucesso! (fictício, não é dinheiro real)`;
   el.msg.className = "ganhou";
   atualizarPainel();
 });

@@ -546,6 +546,59 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 }
 #resetar:disabled { opacity: 0.35; }
 
+/* ---- saque (fictício) ---- */
+#sacarBtn {
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  border-radius: 12px;
+  border: 1px solid rgba(74, 222, 128, 0.6);
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.18), rgba(0, 0, 0, 0.4));
+  color: #eafff0;
+  box-shadow: 0 0 14px rgba(74, 222, 128, 0.25);
+}
+#sacarBtn:active { transform: translateY(1px); }
+#sacarForm[hidden] { display: none; }
+#sacarForm {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#pixChave {
+  width: 100%;
+  padding: 9px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  border-radius: 10px;
+  border: 1px solid rgba(245, 197, 66, 0.4);
+  background: rgba(0, 0, 0, 0.5);
+  color: var(--creme);
+}
+#pixChave::placeholder { color: rgba(255, 244, 214, 0.4); }
+#pixChave:focus { outline: none; border-color: var(--ouro); }
+#sacarBotoes { display: flex; gap: 6px; }
+#sacarBotoes button {
+  flex: 1;
+  padding: 8px 10px;
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  border-radius: 10px;
+}
+#pixCancelar {
+  border: 1px solid rgba(245, 197, 66, 0.3);
+  background: rgba(0, 0, 0, 0.4);
+  color: rgba(255, 244, 214, 0.6);
+}
+#pixConfirmar {
+  border: 1px solid rgba(74, 222, 128, 0.6);
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.25), rgba(0, 0, 0, 0.3));
+  color: #eafff0;
+}
+
 /* ---- rodapé ---- */
 #rodape {
   margin-top: 4px;
