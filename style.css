@@ -265,6 +265,23 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   border-radius: 12px;
   background: #080706;
   box-shadow: var(--neon), inset 0 0 24px rgba(0, 0, 0, 0.9);
+  animation: acendeMoldura 6s ease-in-out infinite;
+}
+/* moldura luxuosa: a cor do neon vai passeando devagar entre dourado,
+   rubi e safira -- como o letreiro de luzes de um cassino de verdade */
+@keyframes acendeMoldura {
+  0%, 100% {
+    border-color: var(--ouro);
+    box-shadow: 0 0 8px rgba(245, 197, 66, 0.85), 0 0 22px rgba(245, 197, 66, 0.5), 0 0 42px rgba(245, 197, 66, 0.25), inset 0 0 24px rgba(0, 0, 0, 0.9);
+  }
+  33% {
+    border-color: #ff6b6b;
+    box-shadow: 0 0 8px rgba(255, 107, 107, 0.85), 0 0 22px rgba(255, 90, 90, 0.5), 0 0 42px rgba(255, 90, 90, 0.25), inset 0 0 24px rgba(0, 0, 0, 0.9);
+  }
+  66% {
+    border-color: #56b8ff;
+    box-shadow: 0 0 8px rgba(86, 184, 255, 0.85), 0 0 22px rgba(86, 184, 255, 0.5), 0 0 42px rgba(86, 184, 255, 0.25), inset 0 0 24px rgba(0, 0, 0, 0.9);
+  }
 }
 #tela {
   display: block;
@@ -325,6 +342,7 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   gap: clamp(13px, 5.5vw, 24px);
   justify-content: center;
   margin-top: 6px;
+  perspective: 600px;
 }
 .letras span {
   --sz: clamp(26px, 7.5vw, 36px);
@@ -357,17 +375,23 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   color: #5c3f0c;
   text-shadow: 0 1px 0 rgba(255, 246, 220, 0.7);
   background: radial-gradient(circle at 50% 28%, #fff7e0, var(--ouro) 44%, #a9791a 100%);
-  animation: pulsaChip 1.25s ease-in-out infinite;
+  animation: giraChip 2.4s ease-in-out infinite;
 }
 .letras span.on::before { opacity: .3; background: repeating-conic-gradient(rgba(120,82,12,.55) 0 5deg, transparent 5deg 30deg); }
-@keyframes pulsaChip {
-  0%, 100% {
-    transform: translateY(-3px) scale(1.03);
+/* moeda dourada: gira no eixo Y (feito ficha virando de verdade) e pulsa
+   junto, brilhando mais forte bem no meio da volta */
+@keyframes giraChip {
+  0% {
+    transform: translateY(-3px) scale(1.03) rotateY(0deg);
     box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #ffe9a8, 0 0 0 5px #8a6412, inset 0 2px 4px rgba(255,255,255,.55), 0 0 12px rgba(245,197,66,.55);
   }
   50% {
-    transform: translateY(-6px) scale(1.14);
+    transform: translateY(-6px) scale(1.14) rotateY(180deg);
     box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #fff6da, 0 0 0 6px #f3cf6a, inset 0 2px 4px rgba(255,255,255,.65), 0 0 34px rgba(245,197,66,1), 0 0 60px rgba(245,197,66,.55);
+  }
+  100% {
+    transform: translateY(-3px) scale(1.03) rotateY(360deg);
+    box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #ffe9a8, 0 0 0 5px #8a6412, inset 0 2px 4px rgba(255,255,255,.55), 0 0 12px rgba(245,197,66,.55);
   }
 }
 
@@ -648,5 +672,5 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 }
 @media (prefers-reduced-motion: reduce) {
   #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on, .superTrack, #gratis,
-  #superOverlay, #superOverlay::before, #superOverlay::after, #superOverlay .txt, .moeda { animation: none; }
+  #superOverlay, #superOverlay::before, #superOverlay::after, #superOverlay .txt, .moeda, #telaWrap { animation: none; }
 }
