@@ -1049,8 +1049,8 @@ document.getElementById("pixConfirmar")?.addEventListener("click", () => {
   sacarAberto = false;
   if (el.pixChave) el.pixChave.value = "";
   salvar();
-  el.msg.textContent = `💸 Saque de ${fmt(valor)} realizado com sucesso! (fictício, não é dinheiro real)`;
-  el.msg.className = "ganhou";
+  el.msg.textContent = `💸 Saque realizado com sucesso! ${fmt(valor)} (fictício)`;
+  el.msg.className = "saque";
   atualizarPainel();
 });
 

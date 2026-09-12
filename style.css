@@ -28,6 +28,11 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  /* "safe" faz cair pro início em vez de cortar os dois lados quando o
+     conteúdo não cabe (tela bem baixa) -- assim sempre dá pra rolar até
+     o topo da cabine em vez de ela ficar centralizada e inacessível */
+  align-items: safe center;
+  justify-content: safe center;
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   background: var(--bg);
   font-family: "Cinzel", Georgia, "Times New Roman", serif;
@@ -39,18 +44,17 @@ body {
   user-select: none;
 }
 
-/* palco: molde do tamanho máximo da cabine. Sem JS nenhum: a cabine
-   fluida (ver #cabine/#telaWrap/#tela abaixo) se ajusta sozinha a
-   qualquer proporção de tela, minimizando sobra nas laterais. */
+/* palco: molde da largura máxima da cabine. A altura é livre (a cabine
+   se dimensiona pelo próprio conteúdo -- ver #cabine/#telaWrap/#tela
+   abaixo) e fica centralizada na tela pelo body; isso garante que a
+   grade dentro de #telaWrap SEMPRE preenche 100% da moldura, em vez de
+   esticar a cabine pra caber e sobrar espaço em volta da grade. */
 #palco {
   position: relative;
   width: min(100%, 480px);
-  height: 100%;
-  max-height: 960px;
 }
 #palco > #cabine {
   width: 100%;
-  height: 100%;
 }
 body::before {
   content: "";
@@ -66,12 +70,11 @@ button { font-family: inherit; cursor: pointer; }
 #cabine {
   position: relative;
   width: 100%;
-  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 7px;
-  padding: 14px 18px 10px;
+  gap: 5px;
+  padding: 10px 18px 8px;
   background: linear-gradient(180deg, var(--cab-1) 0%, #14100c 55%, #070605 100%);
   border: 2px solid var(--ouro);
   border-radius: 34px 34px 26px 26px;
@@ -120,7 +123,7 @@ button { font-family: inherit; cursor: pointer; }
 #marquise {
   position: relative;
   width: 100%;
-  height: 64px;
+  height: 58px;
   display: grid;
   place-items: center;
   border: 2px solid var(--ouro-claro);
@@ -251,15 +254,14 @@ h1 .g {
 h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 
 /* ---- janela dos rolos ----
-   flex:1 faz essa caixa absorver toda sobra vertical da cabine. Dentro
-   dela, object-fit:contain no canvas resolve sozinho o maior quadrado
-   que cabe no espaço -- mais simples e mais compatível entre navegadores
-   do que container query units (que tiveram comportamento inconsistente
-   no Safari real, mesmo funcionando certinho no Chrome de teste). */
+   aspect-ratio trava essa caixa na MESMA proporção do canvas (6:5,
+   LARG/ALT do game.js) -- assim ela nunca "estica" além do que a grade
+   ocupa. É por isso que a cabine não força mais height:100% (ver
+   #palco/#cabine acima): a altura total vem do próprio conteúdo, então
+   a grade sempre preenche 100% desta moldura, em qualquer tela. */
 #telaWrap {
   width: 100%;
-  flex: 1 1 auto;
-  min-height: 90px;
+  aspect-ratio: 6 / 5;
   padding: 7px;
   border: 2px solid var(--ouro);
   border-radius: 12px;
@@ -295,7 +297,7 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 /* ===================== SUPER PRÊMIO ===================== */
 #super {
   width: 100%;
-  padding: 7px 12px 8px;
+  padding: 5px 12px 6px;
   border: 1px solid rgba(245, 197, 66, 0.5);
   border-radius: 13px;
   background:
@@ -341,7 +343,7 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   display: flex;
   gap: clamp(13px, 5.5vw, 24px);
   justify-content: center;
-  margin-top: 6px;
+  margin-top: 4px;
   perspective: 600px;
 }
 .letras span {
@@ -471,7 +473,7 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 #girar {
   position: relative;
   width: 100%;
-  padding: 12px 20px;
+  padding: 10px 20px;
   border: none;
   border-radius: 15px;
   overflow: hidden;
@@ -534,6 +536,26 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 #msg.ganhou { color: var(--ouro-claro); font-weight: 800; opacity: 1; }
 #msg.super { color: var(--ouro); font-weight: 800; letter-spacing: 1px; opacity: 1; }
 #msg.perdeu { opacity: 0.55; }
+/* destaque do saque: vira uma faixa com brilho, não só texto */
+#msg.saque {
+  display: inline-block;
+  color: #eafff0;
+  font-size: 12.5px;
+  font-weight: 800;
+  letter-spacing: 0.4px;
+  opacity: 1;
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(74, 222, 128, 0.65);
+  background: linear-gradient(180deg, rgba(74, 222, 128, 0.24), rgba(0, 0, 0, 0.45));
+  box-shadow: 0 0 18px rgba(74, 222, 128, 0.55), inset 0 0 10px rgba(74, 222, 128, 0.15);
+  animation: destacaSaque 0.5s ease-out;
+}
+@keyframes destacaSaque {
+  0% { transform: scale(0.8); opacity: 0; }
+  60% { transform: scale(1.07); }
+  100% { transform: scale(1); opacity: 1; }
+}
 
 #resetar {
   font-size: 10.5px;
@@ -549,7 +571,7 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 /* ---- saque (fictício) ---- */
 #sacarBtn {
   width: 100%;
-  padding: 10px 14px;
+  padding: 8px 14px;
   font-size: 13px;
   font-weight: 800;
   letter-spacing: 1px;
@@ -725,5 +747,5 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 }
 @media (prefers-reduced-motion: reduce) {
   #girar, #girar::after, #emblema, #marquise::after, #ticker, #ticker span, .letras span.on, .superTrack, #gratis,
-  #superOverlay, #superOverlay::before, #superOverlay::after, #superOverlay .txt, .moeda, #telaWrap { animation: none; }
+  #superOverlay, #superOverlay::before, #superOverlay::after, #superOverlay .txt, .moeda, #telaWrap, #msg.saque { animation: none; }
 }
