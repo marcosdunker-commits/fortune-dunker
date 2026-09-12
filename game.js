@@ -40,7 +40,7 @@ const SIMBOLOS = [
   { s: "diamante", peso: 11, pag: [3, 18, 75, 300] },
   { s: "estrela",  peso: 9,  pag: [2, 9, 38, 135] },
   { s: "sino",     peso: 12, pag: [3, 12, 45, 160] },
-  { s: "uva",      peso: 23, pag: [2, 5, 18, 68] },
+  { s: "ferradura", peso: 23, pag: [2, 5, 18, 68] },
   { s: "limao",    peso: 47, pag: [2, 3, 11, 33] },
   { s: "cereja",   peso: 67, pag: [2, 3, 8, 24] },
 ];
@@ -63,14 +63,21 @@ const SUPER_PREMIO = 5000;
 // ============================================================
 //  SÍMBOLOS EM VETOR — todos iluminados, pulsando e brilhando
 // ============================================================
-const FASE = { coroa: 0, sete: 1, diamante: 2, estrela: 3, sino: 4, uva: 5, limao: 6, cereja: 7 };
+
+// contornos da coroa e da ferradura vieram prontos do game-icons.net
+// (licença CC BY 3.0 -- autores: Lorc / Delapouite, https://game-icons.net),
+// viewBox 0 0 512 512. A gente só troca a cor/brilho/animação por cima.
+const COROA_PATH = new Path2D("m408.256 119.46-37.7 52.165 19.57 44.426 34.8-37.214-16.67-59.375zm86.074 12.513L384.44 249.498 334.01 135.02l-75.162 132.947-86.948-131.78-33.334 114.122L17.922 132.83l39.3 127.6c1.945-.348 3.94-.54 5.98-.54 18.812 0 34.26 15.452 34.26 34.262 0 13.823-8.346 25.822-20.235 31.22l5.337 17.33c12.425 25.466 71.863 45.152 176.582 47.206 110.805 2.174 178.12-17.54 189.854-47.207h-.002l4.357-20.26c-16.836-2.114-30.02-16.612-30.02-33.986 0-18.81 15.45-34.262 34.263-34.262 3.513 0 6.91.54 10.11 1.54l26.622-123.762zm-391.77 2.04 1.22 56.337 25.56 24.89 9.592-32.842-36.37-48.386zm150.585 2.91-24.483 51.36 28.955 43.885 24.922-44.08-29.395-51.166zm204.453 135.962c-8.712 0-15.575 6.862-15.575 15.572 0 8.71 6.863 15.574 15.575 15.574s15.572-6.863 15.572-15.573-6.86-15.572-15.572-15.572zM63.2 278.58c-8.71 0-15.573 6.864-15.573 15.574s6.862 15.573 15.574 15.573c8.713 0 15.573-6.862 15.573-15.573 0-8.71-6.86-15.574-15.572-15.574zm130.33 17.842c18.812 0 34.26 15.45 34.26 34.262 0 18.81-15.448 34.26-34.26 34.26-18.813 0-34.262-15.45-34.262-34.26s15.45-34.262 34.26-34.262zm131.234 0c18.812 0 34.26 15.45 34.26 34.262 0 18.81-15.448 34.26-34.26 34.26-18.813 0-34.262-15.45-34.262-34.26s15.45-34.262 34.262-34.262zm-131.235 18.69c-8.713 0-15.573 6.86-15.573 15.572 0 8.71 6.86 15.574 15.572 15.574 8.71 0 15.572-6.864 15.572-15.574s-6.86-15.573-15.573-15.573zm131.234 0c-8.712 0-15.573 6.86-15.573 15.572 0 8.71 6.862 15.574 15.574 15.574s15.574-6.864 15.574-15.574-6.862-15.573-15.574-15.573z");
+const FERRADURA_PATH = new Path2D("M251.188 28.538c-202.97 2.955-190.282 230.2-126.782 409.47-14.678 9.41-17.29 6.385-15.75 17.062 1.105 7.65 12.483 23.233 17.563 25.844s9.372 2.85 17.03 2.343 60.337-8.77 49.22-22.625c-48-67.4-126.572-365.46 63.53-374.062 190.102 8.603 111.53 306.66 63.53 374.062-11.117 13.855 41.562 22.117 49.22 22.625s11.95.267 17.03-2.343 16.46-18.194 17.564-25.844c1.54-10.678-1.072-7.65-15.75-17.063 63.5-179.27 76.187-406.514-126.78-409.469-1.6-.023-3.19-.005-4.814 0-1.625-.004-3.214-.023-4.813 0zm-45.625 22.157c6.903 0 12.5 5.596 12.5 12.5s-5.597 12.5-12.5 12.5-12.5-5.597-12.5-12.5 5.596-12.5 12.5-12.5zm100.875 0c6.903 0 12.5 5.596 12.5 12.5s-5.597 12.5-12.5 12.5-12.5-5.597-12.5-12.5 5.596-12.5 12.5-12.5zM135.594 109.32c6.903 0 12.5 5.596 12.5 12.5s-5.597 12.5-12.5 12.5-12.5-5.597-12.5-12.5 5.596-12.5 12.5-12.5zm240.812 0c6.904 0 12.5 5.596 12.5 12.5s-5.596 12.5-12.5 12.5-12.5-5.597-12.5-12.5 5.597-12.5 12.5-12.5zm-266.844 96c6.904 0 12.5 5.596 12.5 12.5s-5.596 12.5-12.5 12.5-12.5-5.597-12.5-12.5 5.597-12.5 12.5-12.5zm292.875 0c6.904 0 12.5 5.596 12.5 12.5s-5.596 12.5-12.5 12.5-12.5-5.597-12.5-12.5 5.597-12.5 12.5-12.5zM118.22 307.82c6.902 0 12.5 5.596 12.5 12.5s-5.598 12.5-12.5 12.5-12.5-5.597-12.5-12.5 5.595-12.5 12.5-12.5zm275.56 0c6.905 0 12.5 5.596 12.5 12.5s-5.595 12.5-12.5 12.5-12.5-5.597-12.5-12.5 5.598-12.5 12.5-12.5zm-254.936 84.062c6.903 0 12.5 5.597 12.5 12.5s-5.597 12.5-12.5 12.5-12.5-5.596-12.5-12.5 5.596-12.5 12.5-12.5zm234.312 0c6.904 0 12.5 5.597 12.5 12.5s-5.596 12.5-12.5 12.5-12.5-5.596-12.5-12.5 5.597-12.5 12.5-12.5z");
+
+const FASE = { coroa: 0, sete: 1, diamante: 2, estrela: 3, sino: 4, ferradura: 5, limao: 6, cereja: 7 };
 const HALO = {
   coroa: "255,215,90",
   sete: "255,70,70",
   diamante: "120,220,255",
   estrela: "255,215,90",
   sino: "255,200,110",
-  uva: "190,120,255",
+  ferradura: "200,215,235",
   limao: "255,225,80",
   cereja: "255,80,90",
 };
@@ -297,77 +304,94 @@ function desenhaLimao(g, R, t, pulso) {
   cintila(g, R * 0.5, -R * 0.4, R * (0.12 + 0.12 * pulso));
 }
 
-function desenhaUva(g, R, t, pulso) {
-  g.strokeStyle = "#7a4a1e";
-  g.lineWidth = R * 0.09;
-  g.beginPath();
-  g.moveTo(0, -R * 0.9);
-  g.lineTo(0, -R * 0.5);
-  g.stroke();
-  folha(g, R * 0.16, -R * 0.82, R * 1.1);
-  const bolas = [
-    [0, -0.5], [-0.42, -0.2], [0.42, -0.2],
-    [-0.66, 0.2], [0, 0.18], [0.66, 0.2],
-    [-0.34, 0.56], [0.34, 0.56], [0, 0.9],
-  ];
-  const rr = R * 0.3;
+function desenhaFerradura(g, R, t, pulso) {
+  // contorno profissional (FERRADURA_PATH) -- metal prateado, balançando
+  // como se estivesse pendurada, bem mais animada que os outros
+  const esc = R * 0.0033;
+  const balanco = Math.sin(t / 500) * 0.22;
+
   g.save();
-  g.shadowColor = `rgba(190,120,255,${0.3 + 0.4 * pulso})`;
-  g.shadowBlur = R * 0.4 * pulso;
-  bolas.forEach(([x, y], i) => {
-    const h = Math.sin(t / 320 + i) * R * 0.05;
-    esferaBrilhante(g, x * R, y * R, rr, "#d8bcff", "#7d3fd6", "#45217e", h, h);
-  });
+  g.rotate(balanco);
+  g.scale(esc, esc);
+  g.translate(-256, -256);
+
+  const gr = g.createLinearGradient(0, 0, 460, 460);
+  gr.addColorStop(0, "#ffffff");
+  gr.addColorStop(0.45, "#cfe0ee");
+  gr.addColorStop(0.75, "#8fa9c2");
+  gr.addColorStop(1, "#4c6079");
+  g.save();
+  g.shadowColor = `rgba(190,215,255,${0.5 + 0.4 * pulso})`;
+  g.shadowBlur = 100 + 200 * pulso;
+  g.fillStyle = gr;
+  g.fill(FERRADURA_PATH);
   g.restore();
-  cintila(g, -R * 0.2, -R * 0.15, R * (0.14 + 0.12 * pulso), "#e8d4ff");
+
+  g.lineWidth = 8;
+  g.strokeStyle = "#fbfeff";
+  g.stroke(FERRADURA_PATH);
+
+  // brilho metálico que desliza
+  g.save();
+  g.clip(FERRADURA_PATH);
+  const off = ((t / 600) % 2 - 1) * 520;
+  g.globalCompositeOperation = "lighter";
+  g.strokeStyle = "rgba(255,255,255,0.6)";
+  g.lineWidth = 60;
+  g.beginPath();
+  g.moveTo(off - 100, -100);
+  g.lineTo(off + 100, 540);
+  g.stroke();
+  g.restore();
+  g.restore();
+
+  cintila(g, -R * 0.4, -R * 0.5, R * (0.16 + 0.14 * pulso), "#eaf6ff");
+  cintila(g, R * 0.42, R * 0.1, R * (0.12 + 0.1 * pulso), "#ffffff");
 }
 
 function desenhaCoroa(g, R, t, pulso) {
-  const pts = [
-    [-0.85, 0.85], [-0.85, 0.08],
-    [-0.5, 0.48], [-0.28, -0.42],
-    [-0.08, 0.28], [0, -0.85],
-    [0.08, 0.28], [0.28, -0.42],
-    [0.5, 0.48], [0.85, 0.08],
-    [0.85, 0.85],
-  ];
-  const gr = g.createLinearGradient(0, -R, 0, R * 0.85);
+  // contorno profissional (COROA_PATH); a gente só aplica cor/brilho/animação
+  const esc = R * 0.0033; // o path é 512x512 -> encolhe pro tamanho do símbolo
+  const balanco = Math.sin(t / 900) * 0.14;       // balanço suave contínuo
+  const flutua = Math.abs(Math.sin(t / 620)) * R * 0.08; // flutua pra cima e voltando
+
+  g.save();
+  g.rotate(balanco);
+  g.translate(0, -flutua);
+  g.scale(esc, esc);
+  g.translate(-256, -256);
+
+  const gr = g.createLinearGradient(0, 0, 0, 460);
   gr.addColorStop(0, "#fff7d6");
   gr.addColorStop(0.5, "#ffd23f");
   gr.addColorStop(1, "#a9791a");
   g.save();
-  g.shadowColor = `rgba(255,215,90,${0.5 + 0.45 * pulso})`;
-  g.shadowBlur = R * (0.35 + 0.7 * pulso);
-  poligono(g, pts, R);
+  g.shadowColor = `rgba(255,215,90,${0.55 + 0.4 * pulso})`;
+  g.shadowBlur = 100 + 210 * pulso;
   g.fillStyle = gr;
-  g.fill();
+  g.fill(COROA_PATH);
   g.restore();
-  g.lineWidth = R * 0.07;
+
+  g.lineWidth = 21;
   g.strokeStyle = "#fff6da";
-  poligono(g, pts, R);
-  g.stroke();
-  g.fillStyle = "rgba(255,255,255,0.18)";
-  g.fillRect(-R * 0.85, R * 0.42, R * 1.7, R * 0.12);
-  // brilho que desliza
+  g.stroke(COROA_PATH);
+
+  // brilho que desliza por cima, sem parar
   g.save();
-  poligono(g, pts, R);
-  g.clip();
-  const off = ((t / 700) % 2 - 1) * 1.6 * R;
+  g.clip(COROA_PATH);
+  const off = ((t / 650) % 2 - 1) * 480;
   g.globalCompositeOperation = "lighter";
-  g.strokeStyle = "rgba(255,255,255,0.5)";
-  g.lineWidth = R * 0.18;
+  g.strokeStyle = "rgba(255,255,255,0.55)";
+  g.lineWidth = 55;
   g.beginPath();
-  g.moveTo(-R + off, -R);
-  g.lineTo(off, R);
+  g.moveTo(off - 260, -80);
+  g.lineTo(off + 260, 540);
   g.stroke();
   g.restore();
-  // joias coloridas nas pontas -- combina com o resto do jogo, que já é
-  // dourado; aqui dá o toque "mais colorido" que foi pedido
-  const h = Math.sin(t / 300) * R * 0.04;
-  esferaBrilhante(g, -R * 0.28, -R * 0.42 + h, R * 0.16, "#ff9a9a", "#e0303a", "#7a0f16", 0, 0);
-  esferaBrilhante(g, 0, -R * 0.85 + h, R * 0.18, "#b9ffe0", "#22c98a", "#0d6b47", 0, 0);
-  esferaBrilhante(g, R * 0.28, -R * 0.42 + h, R * 0.16, "#9adcff", "#2196e0", "#0d4f7a", 0, 0);
-  cintila(g, -R * 0.5, 0.1 * R, R * (0.16 + 0.14 * pulso));
+  g.restore();
+
+  cintila(g, -R * 0.5, -R * 0.55, R * (0.2 + 0.18 * pulso));
+  cintila(g, R * 0.45, -R * 0.15, R * (0.14 + 0.12 * pulso), "#fff3c4");
 }
 
 function desenhaSino(g, R, t, pulso) {
@@ -440,7 +464,7 @@ function desenharSimbolo(g, tipo, cx, cy, R, t) {
   else if (tipo === "estrela") desenhaEstrela(g, R, t, pulso);
   else if (tipo === "cereja") desenhaCereja(g, R, t, pulso);
   else if (tipo === "limao") desenhaLimao(g, R, t, pulso);
-  else if (tipo === "uva") desenhaUva(g, R, t, pulso);
+  else if (tipo === "ferradura") desenhaFerradura(g, R, t, pulso);
   else if (tipo === "coroa") desenhaCoroa(g, R, t, pulso);
   else if (tipo === "sino") desenhaSino(g, R, t, pulso);
 

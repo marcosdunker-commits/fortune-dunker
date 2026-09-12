@@ -641,6 +641,7 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
   letter-spacing: 0.5px;
   color: rgba(255, 244, 214, 0.26);
 }
+#rodape a { color: inherit; text-decoration: underline; text-underline-offset: 1px; }
 #rodape b {
   font-weight: 700;
   color: rgba(245, 197, 66, 0.5);
