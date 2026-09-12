@@ -1,11 +1,41 @@
 // ============================================================
-//  som.js — só efeitos, sem música de fundo.
-//  Toca ao GIRAR e quando dá prêmio. Web Audio, sem arquivos.
+//  som.js — a maior parte é efeito sintetizado na hora (sem arquivo).
+//  Só o sino de vitória e o tilintar de fichas vêm de amostras reais
+//  (Kenney.nl, licença CC0 -- www.kenney.nl) pra soar mais autêntico,
+//  igual caça-níquel de cassino de verdade.
+//  Toca ao GIRAR e quando dá prêmio.
 // ============================================================
 var Som = (() => {
   let ctx, master;
   let ligado = true;
   try { ligado = localStorage.getItem("dunker.som") !== "0"; } catch (e) {}
+
+  // amostras reais -- carregadas uma vez, guardadas já decodificadas
+  const AMOSTRAS_SRC = { sino: "audio/sino.ogg", fichas: "audio/fichas.ogg", ficha1: "audio/ficha-uma.ogg" };
+  const amostras = {};
+  function carregarAmostras() {
+    for (const [nome, src] of Object.entries(AMOSTRAS_SRC)) {
+      if (amostras[nome]) continue;
+      fetch(src)
+        .then((r) => r.arrayBuffer())
+        .then((buf) => ctx.decodeAudioData(buf))
+        .then((decoded) => { amostras[nome] = decoded; })
+        .catch(() => {}); // sem internet/arquivo -> só fica sem essa amostra
+    }
+  }
+  function tocarAmostra(nome, t, vol, taxa) {
+    const buf = amostras[nome];
+    if (!buf) return; // ainda carregando ou falhou -- os sons sintetizados já cobrem o momento
+    try {
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.playbackRate.value = taxa || 1;
+      const g = ctx.createGain();
+      g.gain.value = vol == null ? 1 : vol;
+      src.connect(g); g.connect(master);
+      src.start(t);
+    } catch (e) {}
+  }
 
   function build() {
     if (ctx) return true;
@@ -16,6 +46,7 @@ var Som = (() => {
       master = ctx.createGain();
       master.gain.value = 0.9;
       master.connect(ctx.destination);
+      carregarAmostras();
       return true;
     } catch (e) { return false; }
   }
@@ -89,7 +120,9 @@ var Som = (() => {
       const tk = t0 + k / rate;
       const f = 1500 + Math.floor((k / n) * 6) * 150;
       nota(f, tk, 0.045, "triangle", 0.085);
-      click(tk, 3400, 0.03, 0.008);
+      // fichas de verdade tilintando junto com o tic sintetizado -- dá o
+      // som de "ficha caindo" de cassino de verdade em vez de só bipe
+      tocarAmostra("ficha1", tk, 0.16, 0.85 + Math.random() * 0.5);
     }
     const tf = t0 + n / rate;
     nota(N.C6, tf, 0.5, "triangle", 0.18);
@@ -109,17 +142,22 @@ var Som = (() => {
     resumir();
     const t = ctx.currentTime;
     [N.C, N.E, N.G].forEach((f) => nota(f, t, 0.5, "triangle", 0.16));
+    tocarAmostra("sino", t, 0.5); // sino de verdade junto com o acorde sintetizado
     contagem(t + 0.12, durContagem(ganho || 10));
   }
   function superPremio(ganho) {
     if (!ligado || !ctx) return;
     resumir();
     const t = ctx.currentTime;
+    tocarAmostra("sino", t, 0.75);
+    tocarAmostra("sino", t + 0.35, 0.55, 1.15); // segundo toque, um pouco mais agudo
     [N.C, N.E, N.G, N.C6, N.E6, N.G6, N.C6, N.E6, N.G6].forEach((f, k) => {
       nota(f, t + k * 0.1, 0.55, "triangle", 0.22);
       nota(f * 1.5, t + k * 0.1, 0.35, "sine", 0.06);
     });
     contagem(t + 1.0, durContagem(ganho || 50000));
+    tocarAmostra("fichas", t + 1.0, 0.5); // "chuva" de fichas caindo junto da contagem
+    tocarAmostra("fichas", t + 2.1, 0.4, 0.9);
     for (let k = 0; k < 10; k++) nota(1400 + Math.random() * 1800, t + 3.4 + k * 0.05, 0.22, "sine", 0.08);
   }
   function gratis() {

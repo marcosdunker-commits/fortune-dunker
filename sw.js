@@ -1,4 +1,4 @@
-const CACHE = "dunker-v5";
+const CACHE = "dunker-v6";
 const ASSETS = [
   "./",
   "./index.html",
@@ -10,6 +10,9 @@ const ASSETS = [
   "./icon-512.png",
   "./maskable-512.png",
   "./manifest.webmanifest",
+  "./audio/sino.ogg",
+  "./audio/fichas.ogg",
+  "./audio/ficha-uma.ogg",
   "https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&display=swap",
 ];
 
