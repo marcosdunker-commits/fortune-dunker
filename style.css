@@ -254,14 +254,14 @@ h1 .g {
 h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 
 /* ---- janela dos rolos ----
-   aspect-ratio trava essa caixa na MESMA proporção do canvas (6:5,
+   aspect-ratio trava essa caixa na MESMA proporção do canvas (1:1,
    LARG/ALT do game.js) -- assim ela nunca "estica" além do que a grade
    ocupa. É por isso que a cabine não força mais height:100% (ver
    #palco/#cabine acima): a altura total vem do próprio conteúdo, então
    a grade sempre preenche 100% desta moldura, em qualquer tela. */
 #telaWrap {
   width: 100%;
-  aspect-ratio: 6 / 5;
+  aspect-ratio: 1 / 1;
   padding: 7px;
   border: 2px solid var(--ouro);
   border-radius: 12px;

@@ -1,5 +1,5 @@
 // ============================================================
-//  Fortune DUNKER — caça-níquel 6×5, estilo "tigrinho".
+//  Fortune DUNKER — caça-níquel 5×5, estilo "tigrinho".
 //  Símbolos desenhados em vetor (nítidos em qualquer resolução).
 //  Valores ficticios, sem dinheiro real, so diversao.
 // ============================================================
@@ -7,11 +7,11 @@
 const canvas = document.getElementById("tela");
 const ctx = canvas.getContext("2d");
 
-const NUM_ROLOS = 6;
+const NUM_ROLOS = 5;
 const LINHAS_VIS = 5;
-const LARG = 432;                 // tamanho lógico (o CSS cuida do tamanho na tela)
+const LARG = 360;                 // tamanho lógico (o CSS cuida do tamanho na tela)
 const ALT = 360;
-const CELULA = LARG / NUM_ROLOS;  // 72 -- mesmo tamanho de célula de sempre
+const CELULA = LARG / NUM_ROLOS;  // 72
 const RAIO = CELULA * 0.38;
 
 // resolução real = lógico × densidade de pixels do aparelho (retina/celular)
@@ -21,40 +21,38 @@ canvas.height = ALT * DPR;
 ctx.scale(DPR, DPR);
 
 const LETRAS = ["D", "U", "N", "K", "E", "R"];
-// 6 rolos, 6 letras -- uma por rolo, cada letra com sua própria chance.
+// Poucas letras e espalhadas: o super prêmio tem que custar a sair.
 const LETRAS_POR_ROLO = [
-  ["D"], ["U"], ["N"], ["K"], ["E"], ["R"],
+  ["D", "R"], ["U"], ["N"], ["K"], ["E"],
 ];
 
-// s = tipo do símbolo desenhado; pag = prêmio [2, 3, 4, 5, 6 iguais] × aposta da linha
+// s = tipo do símbolo desenhado; pag = prêmio [2, 3, 4, 5 iguais] × aposta da linha
 // (2 iguais paga pouquinho -> muitos prêmios pequenos toda hora)
 // pesos altos -> as letras D-U-N-K-E-R ficam mais raras (super prêmio mais difícil)
 // estrela é o "scatter" das rodadas grátis -> peso baixo de propósito (ela é rara)
-// coroa e sino são os símbolos novos da grade 6x5 (coroa = premium, acima do
-// sete/diamante; sino = intermediário, entre o diamante e a uva). Os pesos
-// dos símbolos que já existiam ficaram com o mesmo valor absoluto de antes;
-// só a estrela subiu um pouco (8->9) pra compensar a diluição de ter 2
-// categorias novas no baralho e manter a fração dela quase idêntica ->
-// chance das rodadas grátis não muda.
+// coroa e sino são os símbolos "premium"/"intermediário" que deram mais
+// variedade além das frutas -- os pesos não dependem de quantos rolos a
+// grade tem (são chance por CÉLULA), então continuam os mesmos de quando
+// a grade foi 6x5.
 const SIMBOLOS = [
-  { s: "coroa",    peso: 5,  pag: [8, 50, 200, 900, 4000] },
-  { s: "sete",     peso: 7,  pag: [5, 30, 120, 600, 3000] },
-  { s: "diamante", peso: 11, pag: [3, 18, 75, 300, 1200] },
-  { s: "estrela",  peso: 9,  pag: [2, 9, 38, 135, 450] },
-  { s: "sino",     peso: 12, pag: [3, 12, 45, 160, 550] },
-  { s: "uva",      peso: 23, pag: [2, 5, 18, 68, 230] },
-  { s: "limao",    peso: 47, pag: [2, 3, 11, 33, 95] },
-  { s: "cereja",   peso: 67, pag: [2, 3, 8, 24, 65] },
+  { s: "coroa",    peso: 5,  pag: [8, 50, 200, 900] },
+  { s: "sete",     peso: 7,  pag: [5, 30, 120, 600] },
+  { s: "diamante", peso: 11, pag: [3, 18, 75, 300] },
+  { s: "estrela",  peso: 9,  pag: [2, 9, 38, 135] },
+  { s: "sino",     peso: 12, pag: [3, 12, 45, 160] },
+  { s: "uva",      peso: 23, pag: [2, 5, 18, 68] },
+  { s: "limao",    peso: 47, pag: [2, 3, 11, 33] },
+  { s: "cereja",   peso: 67, pag: [2, 3, 8, 24] },
 ];
 
-// diagonais numa grade 6 colunas x 5 linhas: como não dá pra dividir igual,
-// a linha de cada coluna é calculada por interpolação arredondada
-// (round(i * 4/5)) pra continuar parecendo uma diagonal de verdade.
+// linhas de pagamento -- geradas a partir de NUM_ROLOS/LINHAS_VIS, então
+// continuam corretas se a grade mudar de tamanho de novo no futuro.
+const linhaReta = (row) => Array.from({ length: NUM_ROLOS }, () => row);
 const DIAG_DESCE = Array.from({ length: NUM_ROLOS }, (_, i) => Math.round(i * (LINHAS_VIS - 1) / (NUM_ROLOS - 1)));
 const LINHAS_PAG = [
-  [2, 2, 2, 2, 2, 2], // meio
-  [0, 0, 0, 0, 0, 0], // topo
-  [4, 4, 4, 4, 4, 4], // base
+  linhaReta(2), // meio
+  linhaReta(0), // topo
+  linhaReta(4), // base
   DIAG_DESCE,                        // diagonal \
   [...DIAG_DESCE].reverse(),         // diagonal /
 ];
@@ -493,10 +491,9 @@ const APOSTAS = [1, 10, 20, 50, 100];
 let apostaIdx = 1;
 let numLinhas = 1;
 
-// rodadas grátis: sai com 6+ estrelas na grade; joga sem descontar a aposta
-// (grade cresceu de 25 pra 30 células -- gatilho sobe na mesma proporção
-// (5 * 30/25 = 6) pra manter a mesma dificuldade de sempre)
-const GATILHO_GRATIS = 6;      // quantas ⭐ pra ativar
+// rodadas grátis: sai com 5+ estrelas na grade; joga sem descontar a aposta
+// (grade voltou a 25 células -- gatilho volta a 5, mesma dificuldade de antes)
+const GATILHO_GRATIS = 5;      // quantas ⭐ pra ativar
 const RODADAS_GRATIS = 10;     // quantas rodadas ganha
 
 let creditos = carregarCreditos();
