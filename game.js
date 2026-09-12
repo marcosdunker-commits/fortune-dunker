@@ -423,6 +423,7 @@ const el = {
   letras: [...document.querySelectorAll(".letras span")],
   deck: [...document.querySelectorAll(".dbtn[data-ap]")],
   overlay: document.getElementById("superOverlay"),
+  resetar: document.getElementById("resetar"),
 };
 
 function carregarCreditos() {
@@ -484,6 +485,7 @@ function atualizarPainel() {
   el.numLinhas.textContent = numLinhas;
   el.apostaTotal.textContent = fmt(apostaTotal());
   el.girar.disabled = girandoTudo || (girosGratis === 0 && creditos < apostaTotal());
+  if (el.resetar) el.resetar.disabled = creditos > 0;
   el.letras.forEach((sp, i) => sp.classList.toggle("on", coletadas[i]));
   el.deck.forEach((b) => b.classList.toggle("sel", b.dataset.ap === String(apostaIdx)));
 
@@ -894,6 +896,8 @@ document.getElementById("lnMais").addEventListener("click", () => {
   numLinhas = Math.min(LINHAS_PAG.length, numLinhas + 1); linhasFlash = 90; atualizarPainel();
 });
 document.getElementById("resetar").addEventListener("click", () => {
+  // só pode recarregar quando o valor zerou -- evita empilhar créditos de graça
+  if (creditos > 0) return;
   // só recarrega o valor -- rodadas grátis e letras coletadas continuam do
   // jeito que estavam, ninguém quer perder o progresso do super prêmio
   creditos += 5000;
