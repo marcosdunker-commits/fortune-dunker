@@ -1,5 +1,5 @@
 // ============================================================
-//  Fortune DUNKER — caça-níquel 5×5, tema pirata, estilo "tigrinho".
+//  Fortune DUNKER — caça-níquel 4×4, tema pirata, estilo "tigrinho".
 //  Símbolos em arte (criada pelo usuário), com brilho/sombra/animação
 //  aplicados por cima via canvas.
 //  Valores ficticios, sem dinheiro real, so diversao.
@@ -8,11 +8,11 @@
 const canvas = document.getElementById("tela");
 const ctx = canvas.getContext("2d");
 
-const NUM_ROLOS = 5;
-const LINHAS_VIS = 5;
-const LARG = 360;                 // tamanho lógico (o CSS cuida do tamanho na tela)
-const ALT = 360;
-const CELULA = LARG / NUM_ROLOS;  // 72
+const NUM_ROLOS = 4;
+const LINHAS_VIS = 4;
+const LARG = 288;                 // tamanho lógico (o CSS cuida do tamanho na tela)
+const ALT = 288;
+const CELULA = LARG / NUM_ROLOS;  // 72 -- mesmo tamanho de célula de sempre
 const RAIO = CELULA * 0.38;
 
 // resolução real = lógico × densidade de pixels do aparelho (retina/celular)
@@ -22,9 +22,9 @@ canvas.height = ALT * DPR;
 ctx.scale(DPR, DPR);
 
 const LETRAS = ["D", "U", "N", "K", "E", "R"];
-// Poucas letras e espalhadas: o super prêmio tem que custar a sair.
+// 4 rolos pra 6 letras -- dois rolos ficam com 2 letras cada, espalhadas.
 const LETRAS_POR_ROLO = [
-  ["D", "R"], ["U"], ["N"], ["K"], ["E"],
+  ["D", "E"], ["U"], ["N", "R"], ["K"],
 ];
 
 // s = tipo do símbolo desenhado; pag = prêmio [2, 3, 4, 5 iguais] × aposta da linha
@@ -49,14 +49,18 @@ const SIMBOLOS = [
   { s: "cartaK",   peso: 67, pag: [1, 2, 6, 16] },
 ];
 
-// linhas de pagamento -- geradas a partir de NUM_ROLOS/LINHAS_VIS, então
-// continuam corretas se a grade mudar de tamanho de novo no futuro.
+// linhas de pagamento -- geradas a partir de NUM_ROLOS/LINHAS_VIS (topo/base/
+// meio nunca mais hardcoded), então continuam corretas se a grade mudar de
+// tamanho de novo no futuro.
 const linhaReta = (row) => Array.from({ length: NUM_ROLOS }, () => row);
-const DIAG_DESCE = Array.from({ length: NUM_ROLOS }, (_, i) => Math.round(i * (LINHAS_VIS - 1) / (NUM_ROLOS - 1)));
+const LINHA_TOPO = 0;
+const LINHA_BASE = LINHAS_VIS - 1;
+const LINHA_MEIO = Math.floor(LINHA_BASE / 2);
+const DIAG_DESCE = Array.from({ length: NUM_ROLOS }, (_, i) => Math.round(i * LINHA_BASE / (NUM_ROLOS - 1)));
 const LINHAS_PAG = [
-  linhaReta(2), // meio
-  linhaReta(0), // topo
-  linhaReta(4), // base
+  linhaReta(LINHA_MEIO),
+  linhaReta(LINHA_TOPO),
+  linhaReta(LINHA_BASE),
   DIAG_DESCE,                        // diagonal \
   [...DIAG_DESCE].reverse(),         // diagonal /
 ];
@@ -231,9 +235,10 @@ const APOSTAS = [1, 10, 20, 50, 100];
 let apostaIdx = 1;
 let numLinhas = 1;
 
-// rodadas grátis: sai com 5+ mapas do tesouro na grade; joga sem descontar
-// a aposta (mesma dificuldade de sempre, só trocou estrela->mapa)
-const GATILHO_GRATIS = 5;      // quantos mapas 🗺️ pra ativar
+// rodadas grátis: sai com 3+ mapas do tesouro na grade; joga sem descontar
+// a aposta (grade caiu de 25 pra 16 células -- gatilho desce na mesma
+// proporção (5 * 16/25 = 3.2 -> 3) pra manter a dificuldade de sempre)
+const GATILHO_GRATIS = 3;      // quantos mapas 🗺️ pra ativar
 const RODADAS_GRATIS = 10;     // quantas rodadas ganha
 
 let creditos = carregarCreditos();
