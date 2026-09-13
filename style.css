@@ -51,7 +51,7 @@ body {
    esticar a cabine pra caber e sobrar espaço em volta da grade. */
 #palco {
   position: relative;
-  width: min(100%, 480px);
+  width: min(97%, 480px);
 }
 #palco > #cabine {
   width: 100%;
