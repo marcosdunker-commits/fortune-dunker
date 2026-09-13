@@ -35,14 +35,14 @@ const LETRAS_POR_ROLO = [
 // grade tem (são chance por CÉLULA), então continuam os mesmos de quando
 // a grade foi 6x5.
 const SIMBOLOS = [
-  { s: "coroa",    peso: 5,  pag: [6, 35, 140, 630] },
-  { s: "sete",     peso: 7,  pag: [4, 21, 84, 420] },
-  { s: "diamante", peso: 11, pag: [2, 13, 53, 210] },
-  { s: "estrela",  peso: 9,  pag: [1, 6, 27, 95] },
-  { s: "sino",     peso: 12, pag: [2, 8, 32, 112] },
-  { s: "ferradura", peso: 23, pag: [1, 4, 13, 48] },
-  { s: "limao",    peso: 47, pag: [1, 2, 8, 23] },
-  { s: "cereja",   peso: 67, pag: [1, 2, 6, 17] },
+  { s: "coroa",    peso: 5,  pag: [6, 34, 136, 611] },
+  { s: "sete",     peso: 7,  pag: [4, 20, 82, 407] },
+  { s: "diamante", peso: 11, pag: [2, 13, 51, 204] },
+  { s: "estrela",  peso: 9,  pag: [1, 6, 26, 92] },
+  { s: "sino",     peso: 12, pag: [2, 8, 31, 109] },
+  { s: "ferradura", peso: 23, pag: [1, 4, 13, 47] },
+  { s: "limao",    peso: 47, pag: [1, 2, 8, 22] },
+  { s: "cereja",   peso: 67, pag: [1, 2, 6, 16] },
 ];
 
 // linhas de pagamento -- geradas a partir de NUM_ROLOS/LINHAS_VIS, então
