@@ -21,32 +21,29 @@ canvas.width = LARG * DPR;
 canvas.height = ALT * DPR;
 ctx.scale(DPR, DPR);
 
-const LETRAS = ["D", "U", "N", "K", "E", "R"];
-// 4 rolos pra 6 letras -- dois rolos ficam com 2 letras cada, espalhadas.
-const LETRAS_POR_ROLO = [
-  ["D", "E"], ["U"], ["N", "R"], ["K"],
-];
-
-// s = tipo do símbolo desenhado; pag = prêmio [2, 3, 4, 5 iguais] × aposta da linha
-// (2 iguais paga pouquinho -> muitos prêmios pequenos toda hora)
-// pesos altos -> as letras D-U-N-K-E-R ficam mais raras (super prêmio mais difícil)
-// mapa é o "scatter" das rodadas grátis -> peso baixo de propósito (é raro)
-// tema pirata: cada símbolo herdou o peso/prêmio exato do que ele substituiu
-// (baú<-coroa, bandeira<-sete, caveira<-diamante, mapa<-estrela, bússola<-
-// sino, papagaio<-ferradura, cartaA<-limão, cartaK<-cereja) -- zero mudança
-// na calibragem de chance/prêmio já ajustada, só trocou a arte.
-// capitão é NOVO: o Wild -- substitui qualquer símbolo pra fechar linha
-// (ver avaliar()), por isso é bem mais raro que tudo e paga mais que o baú.
+// s = tipo do símbolo desenhado; pag = prêmio [2, 3, 4 iguais] × aposta da
+// linha (grade é 4 rolos, então 4 iguais já é o máximo possível numa linha).
+// mapa é o "scatter" das rodadas grátis -> peso ajustado pra manter a MESMA
+// fração do total que tinha antes (~4,9%), preservando a dificuldade de
+// sempre mesmo com o baralho agora bem maior (15 tipos em vez de 9).
+// capitão é o Wild -- substitui qualquer símbolo pra fechar linha (ver
+// avaliar()), por isso é o mais raro de todos e paga mais que qualquer outro.
 const SIMBOLOS = [
-  { s: "capitao",  peso: 4,  pag: [10, 60, 250, 1100] },
-  { s: "bau",      peso: 5,  pag: [6, 34, 136, 611] },
-  { s: "bandeira", peso: 7,  pag: [4, 20, 82, 407] },
-  { s: "caveira",  peso: 11, pag: [2, 13, 51, 204] },
-  { s: "mapa",     peso: 9,  pag: [1, 6, 26, 92] },
-  { s: "bussola",  peso: 12, pag: [2, 8, 31, 109] },
-  { s: "papagaio", peso: 23, pag: [1, 4, 13, 47] },
-  { s: "cartaA",   peso: 47, pag: [1, 2, 8, 22] },
-  { s: "cartaK",   peso: 67, pag: [1, 2, 6, 16] },
+  { s: "capitao",  peso: 4,  pag: [12, 70, 500] },
+  { s: "bau",      peso: 6,  pag: [8, 40, 220] },
+  { s: "bandeira", peso: 8,  pag: [5, 24, 130] },
+  { s: "caveira",  peso: 10, pag: [4, 18, 95] },
+  { s: "bussola",  peso: 13, pag: [3, 13, 65] },
+  { s: "pistola",  peso: 16, pag: [2, 10, 48] },
+  { s: "bomba",    peso: 19, pag: [2, 8, 38] },
+  { s: "rum",      peso: 22, pag: [2, 7, 30] },
+  { s: "papagaio", peso: 26, pag: [1, 5, 24] },
+  { s: "mapa",     peso: 16, pag: [1, 5, 22] },
+  { s: "cartaA",   peso: 30, pag: [1, 4, 16] },
+  { s: "cartaK",   peso: 34, pag: [1, 3, 13] },
+  { s: "cartaQ",   peso: 38, pag: [1, 3, 11] },
+  { s: "cartaJ",   peso: 42, pag: [1, 2, 9] },
+  { s: "carta10",  peso: 46, pag: [1, 2, 7] },
 ];
 
 // linhas de pagamento -- geradas a partir de NUM_ROLOS/LINHAS_VIS (topo/base/
@@ -73,38 +70,42 @@ const SUPER_PREMIO = 5000;
 //  tratamento de brilho/sombra/cintilação que todo símbolo já tinha
 // ============================================================
 
-// folha 5x3 (1536x1024) com os símbolos; fundo já vem transparente
-// (removido do preto original com "magick -fuzz 10% -transparent black")
-const spritePiratas = new Image();
-spritePiratas.src = "pirata-simbolos.webp";
-const SPRITE_COLS = 5, SPRITE_LINS = 3;
-const SPRITE_CW = 1536 / SPRITE_COLS;
-const SPRITE_CH = 1024 / SPRITE_LINS;
+// cada símbolo é a própria imagem gerada pelo usuário (pasta simbolos/,
+// fundo já transparente) -- sem sprite sheet, sem recorte, cada uma com
+// seu próprio tamanho natural.
+const SIMBOLOS_IMG = [
+  "capitao", "bau", "bandeira", "bussola", "papagaio",
+  "caveira", "pistola", "bomba", "rum", "mapa",
+  "cartaA", "cartaK", "cartaQ", "cartaJ", "carta10",
+];
+const IMAGENS = {};
+for (const nome of SIMBOLOS_IMG) {
+  const img = new Image();
+  img.src = `simbolos/${nome}.webp`;
+  IMAGENS[nome] = img;
+}
 
-// posição [coluna, linha] de cada símbolo na folha
-const SPRITE_POS = {
-  capitao:  [0, 0], // Wild -- substitui qualquer símbolo pra fechar linha
-  bau:      [1, 0],
-  bandeira: [2, 0],
-  bussola:  [3, 0],
-  papagaio: [4, 0],
-  cartaA:   [0, 1],
-  cartaK:   [1, 1],
-  caveira:  [2, 2],
-  mapa:     [4, 2], // scatter -- ativa rodadas grátis (achou o mapa!)
+const FASE = {
+  capitao: 0, bau: 1, bandeira: 2, bussola: 3, papagaio: 4,
+  caveira: 5, pistola: 6, bomba: 7, rum: 8, mapa: 9,
+  cartaA: 10, cartaK: 11, cartaQ: 12, cartaJ: 13, carta10: 14,
 };
-
-const FASE = { capitao: 0, bau: 1, bandeira: 2, mapa: 3, bussola: 4, papagaio: 5, cartaA: 6, cartaK: 7, caveira: 8 };
 const HALO = {
-  capitao: "255,120,60",
+  capitao: "255,120,60",   // Wild -- substitui qualquer símbolo pra fechar linha
   bau: "255,210,90",
   bandeira: "255,90,90",
-  mapa: "225,190,120",
   bussola: "255,205,110",
   papagaio: "255,140,60",
+  caveira: "220,220,220",
+  pistola: "190,205,220",
+  bomba: "255,120,70",
+  rum: "210,150,70",
+  mapa: "225,190,120",      // scatter -- ativa rodadas grátis (achou o mapa!)
   cartaA: "255,90,90",
   cartaK: "255,180,70",
-  caveira: "220,220,220",
+  cartaQ: "195,140,255",
+  cartaJ: "120,200,255",
+  carta10: "180,255,180",
 };
 
 // estrelinha de brilho de 4 pontas
@@ -127,21 +128,22 @@ function cintila(g, x, y, s, cor) {
   g.restore();
 }
 
-// desenha o recorte do símbolo na folha, com o mesmo brilho/sombra/brilho-
-// deslizante/cintilação que os símbolos sempre tiveram, só que clipando um
-// retângulo em vez de um contorno vetorial (a imagem já vem recortada)
+// desenha a imagem do símbolo com o mesmo brilho/sombra/brilho-deslizante/
+// cintilação que os símbolos sempre tiveram, só que clipando um retângulo
+// em vez de um contorno vetorial (a imagem já vem recortada e transparente)
 function desenhaSprite(g, tipo, R, t, pulso) {
-  const [col, lin] = SPRITE_POS[tipo];
-  const sx = col * SPRITE_CW, sy = lin * SPRITE_CH;
-  const escala = (R * 1.9) / Math.max(SPRITE_CW, SPRITE_CH);
-  const dw = SPRITE_CW * escala, dh = SPRITE_CH * escala;
+  const img = IMAGENS[tipo];
+  const iw = (img && img.naturalWidth) || 400;
+  const ih = (img && img.naturalHeight) || 400;
+  const escala = (R * 1.9) / Math.max(iw, ih);
+  const dw = iw * escala, dh = ih * escala;
   const rgb = HALO[tipo] || "255,210,120";
 
   g.save();
   g.shadowColor = `rgba(${rgb},${0.5 + 0.4 * pulso})`;
   g.shadowBlur = R * (0.3 + 0.5 * pulso);
-  if (spritePiratas.complete && spritePiratas.naturalWidth) {
-    g.drawImage(spritePiratas, sx, sy, SPRITE_CW, SPRITE_CH, -dw / 2, -dh / 2, dw, dh);
+  if (img && img.complete && img.naturalWidth) {
+    g.drawImage(img, -dw / 2, -dh / 2, dw, dh);
   }
   g.restore();
 
@@ -194,12 +196,11 @@ function desenharSimbolo(g, tipo, cx, cy, R, t) {
 // ============================================================
 //  ROLOS
 // ============================================================
-function montarTira(indiceRolo) {
+function montarTira() {
   const tira = [];
   for (const item of SIMBOLOS) {
     for (let i = 0; i < item.peso; i++) tira.push(item.s);
   }
-  for (const L of LETRAS_POR_ROLO[indiceRolo]) tira.push(L);
   for (let i = tira.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [tira[i], tira[j]] = [tira[j], tira[i]];
@@ -210,7 +211,7 @@ function montarTira(indiceRolo) {
 const rolos = [];
 for (let i = 0; i < NUM_ROLOS; i++) {
   rolos.push({
-    tira: montarTira(i),
+    tira: montarTira(),
     pos: Math.random() * 1000,
     girando: false,
     velocidade: 0,
@@ -219,8 +220,6 @@ for (let i = 0; i < NUM_ROLOS; i++) {
     de: 0, para: 0, dur: 0, t: 0,
   });
 }
-
-const ehLetra = (s) => s.length === 1 && s >= "A" && s <= "Z";
 
 function simboloNaLinha(rolo, linha) {
   const topo = Math.floor(rolo.pos / CELULA);
@@ -242,7 +241,6 @@ const GATILHO_GRATIS = 3;      // quantos mapas 🗺️ pra ativar
 const RODADAS_GRATIS = 10;     // quantas rodadas ganha
 
 let creditos = carregarCreditos();
-let coletadas = carregarLetras();
 let girosGratis = carregarGratis();
 let girandoTudo = false;
 let sacarAberto = false; // formulário de "saque" (chave PIX) aberto?
@@ -266,7 +264,6 @@ const el = {
   girarTxt: document.querySelector("#girar span"),
   gratis: document.getElementById("gratis"),
   gratisN: document.getElementById("gratisN"),
-  letras: [...document.querySelectorAll(".letras span")],
   deck: [...document.querySelectorAll(".dbtn[data-ap]")],
   overlay: document.getElementById("superOverlay"),
   resetar: document.getElementById("resetar"),
@@ -279,20 +276,12 @@ function carregarCreditos() {
   const v = parseInt(localStorage.getItem("dunker.creditos"), 10);
   return Number.isFinite(v) && v > 0 ? v : 10000;
 }
-function carregarLetras() {
-  try {
-    const a = JSON.parse(localStorage.getItem("dunker.letras"));
-    if (Array.isArray(a) && a.length === 6) return a.map(Boolean);
-  } catch (e) { /* ignora */ }
-  return [false, false, false, false, false, false];
-}
 function carregarGratis() {
   const v = parseInt(localStorage.getItem("dunker.gratis"), 10);
   return Number.isFinite(v) && v > 0 ? v : 0;
 }
 function salvar() {
   localStorage.setItem("dunker.creditos", String(creditos));
-  localStorage.setItem("dunker.letras", JSON.stringify(coletadas));
   localStorage.setItem("dunker.gratis", String(girosGratis));
 }
 
@@ -341,7 +330,6 @@ function atualizarPainel() {
   if (el.sacarBtn) el.sacarBtn.hidden = !podeSacar || sacarAberto;
   if (el.sacarForm) el.sacarForm.hidden = !sacarAberto;
   if (el.sacarBtn) el.sacarBtn.textContent = "\u{1F4B8} Sacar " + fmt(creditos);
-  el.letras.forEach((sp, i) => sp.classList.toggle("on", coletadas[i]));
   el.deck.forEach((b) => b.classList.toggle("sel", b.dataset.ap === String(apostaIdx)));
 
   // rodadas grátis
@@ -434,7 +422,9 @@ function avaliar() {
   // capitão (Wild) substitui qualquer símbolo pra completar a sequência --
   // o "alvo" da linha é o primeiro símbolo não-Wild encontrado a partir do
   // rolo 0; se só tiver Wild na sequência, ela paga pela tabela do próprio
-  // capitão. Letra sempre corta a sequência, igual antes.
+  // capitão -- e quando isso fecha a linha INTEIRA (todos os rolos), é o
+  // super prêmio: capitães alinhados de ponta a ponta.
+  let superAtivado = false;
   for (let l = 0; l < numLinhas; l++) {
     const linha = LINHAS_PAG[l];
     const seq = grade.map((col, c) => col[linha[c]]);
@@ -442,13 +432,12 @@ function avaliar() {
     let n = 0, alvo = null;
     while (n < NUM_ROLOS) {
       const s = seq[n];
-      if (ehLetra(s)) break;
       if (s === "capitao") { n++; continue; }
       if (alvo === null) { alvo = s; n++; continue; }
       if (s === alvo) { n++; continue; }
       break;
     }
-    if (alvo === null) alvo = "capitao"; // sequência só de Wild (ou vazia)
+    if (alvo === null) alvo = "capitao"; // sequência só de Wild
 
     if (n >= 2) {
       const info = SIMBOLOS.find((x) => x.s === alvo);
@@ -456,30 +445,13 @@ function avaliar() {
       ganho += valor;
       linhasVencedoras.push({ l, n });
       detalhes.push(`×${n} (+${valor})`);
+      if (alvo === "capitao" && n === NUM_ROLOS) superAtivado = true;
     }
   }
 
-  // letras só contam quando param SOBRE uma linha ativa (mais linhas = mais chance)
-  const novas = [];
-  for (let l = 0; l < numLinhas; l++) {
-    const linha = LINHAS_PAG[l];
-    for (let c = 0; c < NUM_ROLOS; c++) {
-      const s = grade[c][linha[c]];
-      if (ehLetra(s)) {
-        const i = LETRAS.indexOf(s);
-        if (i >= 0 && !coletadas[i]) { coletadas[i] = true; novas.push(s); }
-      }
-    }
-  }
+  if (superAtivado) ganho += SUPER_PREMIO;
 
-  let super_ = false;
-  if (coletadas.every(Boolean)) {
-    ganho += SUPER_PREMIO;
-    super_ = true;
-    coletadas = [false, false, false, false, false, false];
-  }
-
-  // rodadas grátis: 5+ mapas do tesouro em qualquer lugar da grade
+  // rodadas grátis: 3+ mapas do tesouro em qualquer lugar da grade
   const mapas = grade.reduce((tot, col) => tot + col.filter((s) => s === "mapa").length, 0);
   const ganhouGratis = mapas >= GATILHO_GRATIS;
   if (ganhouGratis) girosGratis += RODADAS_GRATIS;
@@ -487,21 +459,18 @@ function avaliar() {
   creditos += ganho;
   salvar();
 
-  if (super_) {
-    el.msg.textContent = `🎉 SUPER PRÊMIO D-U-N-K-E-R!  +${SUPER_PREMIO}`;
+  if (superAtivado) {
+    el.msg.textContent = `🎉 SUPER PRÊMIO! CAPITÃES ALINHADOS!  +${ganho}`;
     el.msg.className = "super";
     flash = 140;
     iniciarFogos();
-    mostrarOverlaySuper();
-    if (window.Som) Som.super(SUPER_PREMIO);
+    mostrarOverlaySuper(ganho);
+    if (window.Som) Som.super(ganho);
   } else if (ganho > 0) {
     el.msg.textContent = `Ganhou ${ganho}!  ${detalhes.join("  ")}`;
     el.msg.className = "ganhou";
     flash = 48;
     if (window.Som) Som.ganhou(ganho);
-  } else if (novas.length) {
-    el.msg.textContent = `Pegou a letra ${novas.join(", ")}!`;
-    el.msg.className = "";
   } else {
     el.msg.textContent = "Não foi dessa vez.";
     el.msg.className = "perdeu";
@@ -544,8 +513,10 @@ function chuvaDeMoedas() {
 }
 
 let overlayTimer = 0;
-function mostrarOverlaySuper() {
+function mostrarOverlaySuper(valor) {
   el.overlay.querySelectorAll(".moeda").forEach((n) => n.remove());
+  const alvoValor = document.getElementById("superValor");
+  if (alvoValor) alvoValor.textContent = "+" + fmt(valor).replace("R$ ", "");
   el.overlay.hidden = false;
   el.overlay.style.animation = "none";
   void el.overlay.offsetWidth;
@@ -665,20 +636,7 @@ function render(t) {
       const y = ln * CELULA - desloc + CELULA / 2;
       const ganhou = parado && venc.has(i + "," + ln);
       const k = ganhou ? (piscando ? 1.16 : 1.05) : 1;
-
-      if (ehLetra(s)) {
-        ctx.save();
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = `bold ${30 * k}px 'Cinzel', Georgia, serif`;
-        ctx.fillStyle = "#ffd23f";
-        ctx.shadowColor = "#ffb020";
-        ctx.shadowBlur = ganhou ? 22 : 12;
-        ctx.fillText(s, x, y + 1);
-        ctx.restore();
-      } else {
-        desenharSimbolo(ctx, s, x, y, RAIO * k, t || 0);
-      }
+      desenharSimbolo(ctx, s, x, y, RAIO * k, t || 0);
     }
   }
 
@@ -764,8 +722,7 @@ document.getElementById("lnMais").addEventListener("click", () => {
 document.getElementById("resetar").addEventListener("click", () => {
   // só pode recarregar quando o valor zerou -- evita empilhar créditos de graça
   if (creditos > 0) return;
-  // só recarrega o valor -- rodadas grátis e letras coletadas continuam do
-  // jeito que estavam, ninguém quer perder o progresso do super prêmio
+  // só recarrega o valor -- rodadas grátis continuam do jeito que estavam
   creditos += 5000;
   salvar();
   el.msg.textContent = "Recarregou R$ 5.000!";
