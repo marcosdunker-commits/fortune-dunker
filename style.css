@@ -341,59 +341,52 @@ h1 .w { color: #fff; text-shadow: 0 0 10px rgba(255, 255, 255, 0.35); }
 }
 .letras {
   display: flex;
-  gap: clamp(13px, 5.5vw, 24px);
+  gap: clamp(6px, 2.4vw, 13px);
   justify-content: center;
   margin-top: 4px;
   perspective: 600px;
 }
+/* placas D-U-N-K-E-R em arte pirata (uma imagem só, 6 fatias iguais via
+   background-position -- técnica de sprite, sem precisar de 6 arquivos) */
 .letras span {
-  --sz: clamp(26px, 7.5vw, 36px);
+  --sz: clamp(30px, 8.5vw, 42px);
   position: relative;
   width: var(--sz);
-  height: var(--sz);
-  display: grid;
-  place-items: center;
-  font-family: "Cinzel", serif;
-  font-size: calc(var(--sz) * 0.44);
-  font-weight: 800;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 32%, #221e17, #0b0907 72%);
-  color: rgba(245, 197, 66, 0.32);
-  box-shadow:
-    0 0 0 2px #5c4310, 0 0 0 4px rgba(245, 197, 66, 0.45),
-    inset 0 2px 3px rgba(255, 240, 205, 0.14), inset 0 -5px 9px rgba(0, 0, 0, 0.6);
-  transition: color .3s, transform .3s, box-shadow .3s;
+  aspect-ratio: 1 / 2;
+  display: block;
+  overflow: hidden;
+  color: transparent;   /* a arte já mostra a letra; texto some visualmente */
+  background-image: url("pirata-letras.webp");
+  background-size: 600% 100%;
+  background-repeat: no-repeat;
+  filter: grayscale(0.9) brightness(0.38) contrast(0.9);
+  opacity: 0.75;
+  transition: filter .4s, opacity .4s;
 }
-.letras span::before {
-  content: "";
-  position: absolute; inset: 4px;
-  border-radius: 50%;
-  background: repeating-conic-gradient(rgba(245, 197, 66, 0.55) 0 5deg, transparent 5deg 30deg);
-  -webkit-mask: radial-gradient(circle, transparent 60%, #000 61%, #000 76%, transparent 77%);
-          mask: radial-gradient(circle, transparent 60%, #000 61%, #000 76%, transparent 77%);
-  opacity: .4;
-}
+.letras span:nth-child(1) { background-position: 0% 0; }
+.letras span:nth-child(2) { background-position: 20% 0; }
+.letras span:nth-child(3) { background-position: 40% 0; }
+.letras span:nth-child(4) { background-position: 60% 0; }
+.letras span:nth-child(5) { background-position: 80% 0; }
+.letras span:nth-child(6) { background-position: 100% 0; }
 .letras span.on {
-  color: #5c3f0c;
-  text-shadow: 0 1px 0 rgba(255, 246, 220, 0.7);
-  background: radial-gradient(circle at 50% 28%, #fff7e0, var(--ouro) 44%, #a9791a 100%);
+  opacity: 1;
   animation: giraChip 2.4s ease-in-out infinite;
 }
-.letras span.on::before { opacity: .3; background: repeating-conic-gradient(rgba(120,82,12,.55) 0 5deg, transparent 5deg 30deg); }
-/* moeda dourada: gira no eixo Y (feito ficha virando de verdade) e pulsa
-   junto, brilhando mais forte bem no meio da volta */
+/* placa dourada: gira no eixo Y (feito ficha virando de verdade) e brilha
+   mais forte bem no meio da volta */
 @keyframes giraChip {
   0% {
     transform: translateY(-3px) scale(1.03) rotateY(0deg);
-    box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #ffe9a8, 0 0 0 5px #8a6412, inset 0 2px 4px rgba(255,255,255,.55), 0 0 12px rgba(245,197,66,.55);
+    filter: drop-shadow(0 0 5px rgba(245,197,66,.6)) drop-shadow(0 0 10px rgba(245,197,66,.3));
   }
   50% {
-    transform: translateY(-6px) scale(1.14) rotateY(180deg);
-    box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #fff6da, 0 0 0 6px #f3cf6a, inset 0 2px 4px rgba(255,255,255,.65), 0 0 34px rgba(245,197,66,1), 0 0 60px rgba(245,197,66,.55);
+    transform: translateY(-6px) scale(1.1) rotateY(180deg);
+    filter: drop-shadow(0 0 14px rgba(245,197,66,1)) drop-shadow(0 0 26px rgba(245,197,66,.6));
   }
   100% {
     transform: translateY(-3px) scale(1.03) rotateY(360deg);
-    box-shadow: 0 0 0 2px #5c4310, 0 0 0 4px #ffe9a8, 0 0 0 5px #8a6412, inset 0 2px 4px rgba(255,255,255,.55), 0 0 12px rgba(245,197,66,.55);
+    filter: drop-shadow(0 0 5px rgba(245,197,66,.6)) drop-shadow(0 0 10px rgba(245,197,66,.3));
   }
 }
 
