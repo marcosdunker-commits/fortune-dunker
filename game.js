@@ -243,7 +243,6 @@ const RODADAS_GRATIS = 10;     // quantas rodadas ganha
 let creditos = carregarCreditos();
 let girosGratis = carregarGratis();
 let girandoTudo = false;
-let sacarAberto = false; // formulário de "saque" (chave PIX) aberto?
 let linhasVencedoras = [];
 let flash = 0;
 let linhasFlash = 0; // realça as linhas ativas quando o jogador muda a quantidade
@@ -267,9 +266,6 @@ const el = {
   deck: [...document.querySelectorAll(".dbtn[data-ap]")],
   overlay: document.getElementById("superOverlay"),
   resetar: document.getElementById("resetar"),
-  sacarBtn: document.getElementById("sacarBtn"),
-  sacarForm: document.getElementById("sacarForm"),
-  pixChave: document.getElementById("pixChave"),
 };
 
 function carregarCreditos() {
@@ -323,13 +319,7 @@ function atualizarPainel() {
   el.numLinhas.textContent = numLinhas;
   el.apostaTotal.textContent = fmt(apostaTotal());
   el.girar.disabled = girandoTudo || (girosGratis === 0 && creditos < apostaTotal());
-  // "Sacar" e "Recarregar" nunca aparecem juntos: com saldo, só dá pra
-  // sacar; zerado, só dá pra recarregar.
-  const podeSacar = creditos > 0;
-  if (el.resetar) el.resetar.hidden = podeSacar;
-  if (el.sacarBtn) el.sacarBtn.hidden = !podeSacar || sacarAberto;
-  if (el.sacarForm) el.sacarForm.hidden = !sacarAberto;
-  if (el.sacarBtn) el.sacarBtn.textContent = "\u{1F4B8} Sacar " + fmt(creditos);
+  if (el.resetar) el.resetar.hidden = creditos > 0;
   el.deck.forEach((b) => b.classList.toggle("sel", b.dataset.ap === String(apostaIdx)));
 
   // rodadas grátis
@@ -337,7 +327,8 @@ function atualizarPainel() {
     el.gratis.hidden = girosGratis <= 0;
     if (el.gratisN) el.gratisN.textContent = girosGratis;
   }
-  if (el.girarTxt) el.girarTxt.textContent = girosGratis > 0 ? "GRÁTIS " + girosGratis : "GIRAR";
+  // a imagem do botão já mostra "GIRAR" -- só sobrepõe texto nas rodadas grátis
+  if (el.girarTxt) el.girarTxt.textContent = girosGratis > 0 ? "GRÁTIS " + girosGratis : "";
 }
 
 // ---------- Fogos ----------
@@ -727,40 +718,6 @@ document.getElementById("resetar").addEventListener("click", () => {
   salvar();
   el.msg.textContent = "Recarregou R$ 5.000!";
   el.msg.className = "ganhou";
-  atualizarPainel();
-});
-
-// ---------- Saque (fictício) ----------
-// Tudo aqui é só de brincadeira: a chave PIX digitada nunca é salva nem
-// enviada pra lugar nenhum (nem localStorage) -- serve só pra dar aquele
-// clima de "saque de verdade" antes de zerar o valor fictício.
-if (el.sacarBtn) {
-  el.sacarBtn.addEventListener("click", () => {
-    if (creditos <= 0) return;
-    sacarAberto = true;
-    atualizarPainel();
-    if (el.pixChave) el.pixChave.focus();
-  });
-}
-document.getElementById("pixCancelar")?.addEventListener("click", () => {
-  sacarAberto = false;
-  if (el.pixChave) el.pixChave.value = "";
-  atualizarPainel();
-});
-document.getElementById("pixConfirmar")?.addEventListener("click", () => {
-  const chave = el.pixChave ? el.pixChave.value.trim() : "";
-  if (!chave) {
-    if (el.pixChave) el.pixChave.focus();
-    return;
-  }
-  const valor = creditos;
-  creditos = 0;
-  creditosVis = 0;
-  sacarAberto = false;
-  if (el.pixChave) el.pixChave.value = "";
-  salvar();
-  el.msg.textContent = `💸 Saque realizado com sucesso! ${fmt(valor)} (fictício)`;
-  el.msg.className = "saque";
   atualizarPainel();
 });
 
